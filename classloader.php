@@ -25,7 +25,7 @@ Class ClassLoader
     // write it out
 
     // clean up
-    $this->cleanup();
+    // $this->cleanup();
 
   }
 
@@ -51,10 +51,9 @@ Class ClassLoader
 
   private function nodeConcatenator()
   {
-    echo file_get_contents($this->tempfile);
-    // $val = "";
-    // passthru("node Concatentor.js 2>&1", $val);
-    // echo $val;
+    $val = "";
+    $line = passthru("node Concatentor.js &", $val);
+    print_r($line);
   }
 
   public function output()
