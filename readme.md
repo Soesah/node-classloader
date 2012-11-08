@@ -18,6 +18,8 @@ As before, with the PHP version:
 
 Since you don't want node to be the server, use PHP to call node from commandline
 
+Here'a nice writeup of useful things:
+http://blog.millermedeiros.com/node-js-as-a-build-script/
 
 
 
