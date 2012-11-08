@@ -1,3 +1,8 @@
+/*
+ * This is what the output should look like to make it work. Note the Extends method at the bottom, which needs to be on the 
+ * prototype of function to make this work.
+ */ 
+
 
 /* a comment to lead in */
 //#com.something.components.thing.Thing
@@ -16,13 +21,12 @@ com.something.components.thing.Thing = (function() {
       this.AnotherThing(parentScope);
   };
 
-  /* This is to keep the constructor property correct and inheritFrom uses this to copy one thing to the other.*/
+  /* This is to keep the constructor property correct and Extends uses this to copy one thing to the other.*/
   Thing.prototype.Thing = Thing;
 
   /* Add simple a method to the class */
   Thing.prototype.doSomething = function doSomething(a1, a2)
   {
-    // comment
     var statement = a1;
     var f = function(){return a2 + 2;};
 
@@ -32,16 +36,14 @@ com.something.components.thing.Thing = (function() {
   /* A static method */
   Thing.test = function test()
   {
-    // static
   };
 
   (function ()
   {
-    // anonymous
   })();
 
   /* inhertance */
-  Thing.inheritFrom(com.something.components.AnotherThing, Identifier({AnotherThing:1}));
+  Thing.Extends(com.something.components.AnotherThing, Identifier({AnotherThing:1}));
 
   /* setting a name on the object, Identifier is used for the cryptor */
   if (!Thing.name) Thing.name = Identifier({Thing:1});
