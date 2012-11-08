@@ -5,7 +5,7 @@ Class ClassLoader
 {
   function __construct($path, $package)
   {
-    $this->tempfile = "filelist.js";
+    $this->tempfiles = array("filelist.js", "concat.js");
     $this->path = $path;
     $this->package = $package;
 
@@ -16,9 +16,10 @@ Class ClassLoader
     $this->saveFileList();
 
     // get node to concatenate this
-    $this->nodeConcatenator();
+    $this->nodeConcatenateCode();
 
     // get node to compile it
+    $this->nodeCompileCode()
 
     // get node to minify it
 
@@ -36,24 +37,27 @@ Class ClassLoader
 
   private function saveFileList()
   {
-    $filelist = $this->tempfile;
+    $filelist = $this->tempfiles[0];
     $fh = fopen($filelist, 'w') or die("can't open file");
-    fwrite($fh, "var filelist = [\n");
+    fwrite($fh, "module.exports.filelist = [\n");
     foreach ($this->sources as $file) 
     {
-      fwrite($fh, "'".$file."'\n");
-      if($file != $this->sources[count($this->sources)-1])
-        fwrite($fh, ",");
+      if($file != $this->sources[0])
+      fwrite($fh, ",");
+      fwrite($fh, "'".str_replace("\\", "/", $file)."'\n");
     }
     fwrite($fh, "];\n");
     fclose($fh);    
   }
 
-  private function nodeConcatenator()
+  private function nodeConcatenateCode()
   {
-    $val = "";
-    $line = passthru("node Concatentor.js &", $val);
-    print_r($line);
+    system("node Concatenator.js");
+  }
+
+  private function nodeCompileCode()
+  {
+    system("node Compile.js");
   }
 
   public function output()
@@ -74,7 +78,8 @@ Class ClassLoader
 
   private function cleanup()
   {
-    unlink($this->tempfile);
+    foreach ($this->tempfiles as $file) 
+      unlink($file);
   }
 }
 
