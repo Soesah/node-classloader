@@ -6,6 +6,9 @@ Class ClassLoader
   function __construct($path, $package)
   {
     $this->tempfiles = array("filelist.js", "concat.js");
+    $this->nodepath = "";
+    if(PHP_OS == "Darwin")
+      $this->nodepath = "/usr/local/bin/";
     $this->path = $path;
     $this->package = $package;
 
@@ -19,7 +22,7 @@ Class ClassLoader
     $this->nodeConcatenateCode();
 
     // get node to compile it
-    $this->nodeCompileCode()
+    $this->nodeCompileCode();
 
     // get node to minify it
 
@@ -43,21 +46,26 @@ Class ClassLoader
     foreach ($this->sources as $file) 
     {
       if($file != $this->sources[0])
-      fwrite($fh, ",");
+        fwrite($fh, ",");
       fwrite($fh, "'".str_replace("\\", "/", $file)."'\n");
     }
     fwrite($fh, "];\n");
     fclose($fh);    
   }
 
+  // TODO refactor this to one step that calls node with the list, and then reads the final file
   private function nodeConcatenateCode()
   {
-    system("node Concatenator.js");
+    $val = "";
+    system($this->nodepath."node Concatenator.js 2>&1", $val);
+    print_r($val);
   }
 
   private function nodeCompileCode()
   {
-    system("node Compile.js");
+    $val = "";
+    system($this->nodepath."node Compiler.js 2>&1", $val);
+    print_r($val);
   }
 
   public function output()
@@ -85,7 +93,7 @@ Class ClassLoader
 
 $package = (isset($_GET["package"]))?$_GET["package"]:"com";
 
-$cl = new ClassLoader("source\\", $package);
+$cl = new ClassLoader("source", $package);
 
 $cl->output();
 
