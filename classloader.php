@@ -5,12 +5,13 @@ Class ClassLoader
 {
   function __construct($path, $package)
   {
-    $this->tempfiles = array("filelist.js", "concat.js");
-    $this->nodepath = "";
-    if(PHP_OS == "Darwin")
-      $this->nodepath = "/usr/local/bin/";
     $this->path = $path;
     $this->package = $package;
+
+    $this->tempfiles = array("filelist.js", "concat.js");
+    $this->nodepath = "";
+    if(PHP_OS == "Darwin") // Mac OS Apache can't find node without full path
+      $this->nodepath = "/usr/local/bin/";
 
     // get a file list
     $this->getFileList();
@@ -56,9 +57,9 @@ Class ClassLoader
   // TODO refactor this to one step that calls node with the list, and then reads the final file
   private function nodeConcatenateCode()
   {
-    $val = "";
-    system($this->nodepath."node Concatenator.js 2>&1", $val);
-    print_r($val);
+    // $val = "";
+    // system($this->nodepath."node Concatenator.js 2>&1", $val);
+    // print_r($val);
   }
 
   private function nodeCompileCode()
