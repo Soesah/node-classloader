@@ -17,5 +17,5 @@ function Concatenator(filelist)
         });
 }
 var out = new Concatenator(filelist);
-out = "module.exports.code = function code(){" + out + "}";
-fs.writeFileSync(outfile, out.join(end_of_line), encoding);
+out = "module.exports.code = function code(){" + out.join(end_of_line) + "}";
+fs.writeFileSync(outfile, out , encoding);

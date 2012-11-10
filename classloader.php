@@ -57,16 +57,14 @@ Class ClassLoader
   // TODO refactor this to one step that calls node with the list, and then reads the final file
   private function nodeConcatenateCode()
   {
-    // $val = "";
-    // system($this->nodepath."node Concatenator.js 2>&1", $val);
-    // print_r($val);
+    $val = "";
+    system($this->nodepath."node Concatenator.js 2>&1", $val);
   }
 
   private function nodeCompileCode()
   {
     $val = "";
     system($this->nodepath."node Compiler.js 2>&1", $val);
-    print_r($val);
   }
 
   public function output()
@@ -94,8 +92,10 @@ Class ClassLoader
 
 $package = (isset($_GET["package"]))?$_GET["package"]:"com";
 
+echo "<textarea rows='40' cols='80'>";
 $cl = new ClassLoader("source", $package);
 
 $cl->output();
+echo "</textarea>";
 
 ?>
