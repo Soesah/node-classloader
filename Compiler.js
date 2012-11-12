@@ -15,20 +15,23 @@ var Compiler = (function(){
   
   var Compiler = function Compiler()
   {
-    var classloader = new cl();
+    this.classloader = new cl();
 
     // import methods that will be used by code to be compiled
-    Package = classloader.Package;
-    Import = classloader.Import;
-    Extends = classloader.Extends;
-    Singleton = classloader.Singleton;
-    Class = classloader.Class;
-    XMLResource = classloader.XMLResource;
-    CSSResource = classloader.CSSResource;
-    Static = classloader.Static;
-    classList = classloader.classList;
-    namespaces = classloader.namespaces;
-    getName = classloader.getName;
+    Package = this.classloader.Package;
+    Import = this.classloader.Import;
+    Extends = this.classloader.Extends;
+    Singleton = this.classloader.Singleton;
+    Class = this.classloader.Class;
+    parseMethods = this.classloader.parseMethods;
+    XMLResource = this.classloader.XMLResource;
+    CSSResource = this.classloader.CSSResource;
+    Static = this.classloader.Static;
+    Protected = this.classloader.Protected;
+    Public = this.classloader.Public;
+    classList = this.classloader.classList;
+    namespaces = this.classloader.namespaces;
+    getName = this.classloader.getName;
   }
 
   Compiler.prototype.Compiler = Compiler;
@@ -38,26 +41,37 @@ var Compiler = (function(){
     require(outfile).code();
   }
 
+  Compiler.prototype.getList = function compile()
+  {
+    for (var i = 0; i < this.classloader.classList.length; i++) 
+    {
+      console.log(this.classloader.classList[i].getName())
+    };
+  }
+
+  Compiler.prototype.writeNamespaces = function writeNamespaces(namespaces, isroot) 
+  {
+    var str = "";
+    for(var name in namespaces)
+    {
+      if(isroot)
+        str += "var " + name +" = {" + writeNamespaces(namespaces[name])+ "}; ";
+      else
+        str += name +": {" + writeNamespaces(namespaces[name])+ "},";
+    }
+
+    return str.substring(0, str.length - 1);
+  };
+
+
   return Compiler;
 })();
 
 
-function writeNamespaces(namespaces, isroot) 
-{
-  var str = "";
-  for(var name in namespaces)
-  {
-    if(isroot)
-      str += "var " + name +" = {" + writeNamespaces(namespaces[name])+ "}; ";
-    else
-      str += name +": {" + writeNamespaces(namespaces[name])+ "},";
-  }
-
-  return str.substring(0, str.length - 1);
-};
 
 var compiler = new Compiler();
 compiler.compile();
+compiler.getList();
 
 //console.log(writeNamespaces(classloader.namespaces, true));
 

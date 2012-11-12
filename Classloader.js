@@ -60,9 +60,21 @@ var ClassLoader = (function(){
   // setup a class
   ClassLoader.prototype.Class = function Class() 
   {
-    for (var i = 0; i < arguments.length; i++) 
+    this.parseMethods(arguments); 
+  };
+
+  ClassLoader.prototype.Singleton = function Singleton () 
+  {
+    this.currentClass.setSingleton();
+
+    this.parseMethods(arguments);
+  };
+
+  ClassLoader.prototype.parseMethods = function(args) 
+  {
+    for (var i = 0; i < args.length; i++) 
     {
-      var arg = arguments[i];
+      var arg = args[i];
       var name = this.getName(arg);
       if(typeof arg == 'function')
       {
@@ -73,13 +85,7 @@ var ClassLoader = (function(){
       }
       else
         this.currentClass.setFlag(arg);        
-    };  
-  };
-
-  ClassLoader.prototype.Singleton = function Singleton () 
-  {
-    this.currentClass.setSingleton();
-    this.Class(arguments);
+    }; 
   };
 
   ClassLoader.prototype.CSSResource = function CSSResource (rsc) 
@@ -105,10 +111,10 @@ var ClassLoader = (function(){
   ClassLoader.prototype.Static = "static";
   ClassLoader.prototype.Protected = "protected";
   ClassLoader.prototype.Public = "public";
-  ClassLoader.prototype.Static = "static";
 
 
   return ClassLoader;
 })();
 
 module.exports = ClassLoader;
+
