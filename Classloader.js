@@ -38,7 +38,7 @@ var ClassLoader = (function(){
   };
 
   // import other classes
-  ClassLoader.prototype.Import = function Import()
+  ClassLoader.prototype.Import = function ()
   {
     for (var i = 0; i < arguments.length; i++) 
     {
@@ -48,7 +48,7 @@ var ClassLoader = (function(){
   };
 
   // extends other classes
-  ClassLoader.prototype.Extends = function Extends()
+  ClassLoader.prototype.Extends = function ()
   {
     for (var i = 0; i < arguments.length; i++) 
     {
@@ -58,19 +58,19 @@ var ClassLoader = (function(){
   };
 
   // setup a class
-  ClassLoader.prototype.Class = function Class() 
+  ClassLoader.prototype.Class = function () 
   {
     this.parseMethods(arguments); 
   };
 
-  ClassLoader.prototype.Singleton = function Singleton () 
+  ClassLoader.prototype.Singleton = function () 
   {
     this.currentClass.setSingleton();
 
     this.parseMethods(arguments);
   };
 
-  ClassLoader.prototype.parseMethods = function(args) 
+  ClassLoader.prototype.parseMethods = function (args) 
   {
     for (var i = 0; i < args.length; i++) 
     {
@@ -88,17 +88,17 @@ var ClassLoader = (function(){
     }; 
   };
 
-  ClassLoader.prototype.CSSResource = function CSSResource (rsc) 
+  ClassLoader.prototype.CSSResource = function (rsc) 
   {
     this.currentClass.setResource("CSSResource", rsc);
   };
 
-  ClassLoader.prototype.XMLResource = function XMLResource (rsc) 
+  ClassLoader.prototype.XMLResource = function (rsc) 
   {
     this.currentClass.setResource("XMLResource", rsc);
   };
 
-  ClassLoader.prototype.getName = function getName(f) {
+  ClassLoader.prototype.getName = function (f) {
     var str = f.toString();
     var name = str.substring(str.indexOf(' ')+1, str.indexOf("("));
     if(name == '' || name == ' ')

@@ -18,6 +18,7 @@ var Compiler = (function(){
     this.classloader = new cl();
 
     // import methods that will be used by code to be compiled
+    // this is strange, why do methods need to be 'touched'?
     Package = this.classloader.Package;
     Import = this.classloader.Import;
     Extends = this.classloader.Extends;

@@ -12,6 +12,7 @@ var Class = (function(){
     this.dependencies = [];
     this.methods = [];
     this.flag = null;
+    this.resolved = false;
   } 
 
   Class.prototype.Class = Class;
@@ -70,6 +71,11 @@ var Class = (function(){
   {
 
   }
+
+  Class.prototype.isResolved = function() 
+  {
+    return this.resolved;
+  };
 
   return Class;
 })();
