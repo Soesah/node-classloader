@@ -1,4 +1,6 @@
-
+/*
+ *  Node Class Loader Class
+ */
 
 var Class = (function(){
   

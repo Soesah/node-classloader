@@ -1,25 +1,25 @@
 /*
- *  Node Class Loader
+ *  Node Classloader
  */
 
-var ClassLoader = (function(){
+var Classloader = (function(){
 
-  var c = require("./Class.js");
+  var ClassObject = require("./Class.js");
   
-  var ClassLoader = function ClassLoader()
+  var Classloader = function Classloader()
   {
-    this.classList = new Array();
+    this.classList = [];
   };
 
-  ClassLoader.prototype.ClassLoader = ClassLoader;
+  Classloader.prototype.Classloader = Classloader;
 
-  // register the package
-  ClassLoader.prototype.Package = function Package(namespaceURI)
+  Classloader.prototype.Package = function (namespaceURI)
   {
-    var cl = new c(namespaceURI);
+    // Create a class; a class always starts with a package, subsequent function calls will be applied to this class.
+    var classObject = new ClassObject(namespaceURI);
 
-    this.classList.push(cl);
-    this.currentClass = cl;
+    this.classList.push(classObject);
+    this.currentClass = classObject;
 
     var namespaces = namespaceURI.split(".");
     var obj = this.namespaces;
@@ -37,9 +37,9 @@ var ClassLoader = (function(){
     };
   };
 
-  // import other classes
-  ClassLoader.prototype.Import = function ()
+  Classloader.prototype.Import = function ()
   {
+    // register the imports on the class
     for (var i = 0; i < arguments.length; i++) 
     {
      var importClass = arguments[i];
@@ -47,9 +47,9 @@ var ClassLoader = (function(){
     };
   };
 
-  // extends other classes
-  ClassLoader.prototype.Extends = function ()
+  Classloader.prototype.Extends = function ()
   {
+    // register extension on the class
     for (var i = 0; i < arguments.length; i++) 
     {
      var extendClass = arguments[i];
@@ -57,28 +57,29 @@ var ClassLoader = (function(){
     };  
   };
 
-  // setup a class
-  ClassLoader.prototype.Class = function () 
+  Classloader.prototype.Class = function () 
   {
+    // the 'Class' method contains the contents of the class
     this.parseMethods(arguments); 
   };
 
-  ClassLoader.prototype.Singleton = function () 
+  Classloader.prototype.Singleton = function () 
   {
     this.currentClass.setSingleton();
 
     this.parseMethods(arguments);
   };
 
-  ClassLoader.prototype.parseMethods = function (args) 
+  Classloader.prototype.parseMethods = function (args) 
   {
+    // Parse the methods in the class
     for (var i = 0; i < args.length; i++) 
     {
       var arg = args[i];
-      var name = this.getName(arg);
       if(typeof arg == 'function')
       {
-        if(i == 0)
+        var name = this.getMethodName(arg);
+        if(i == 0) // the first method is the constructor 
           this.currentClass.setConstructor(name, arg);
         else
           this.currentClass.addMethod(name, arg);
@@ -88,17 +89,19 @@ var ClassLoader = (function(){
     }; 
   };
 
-  ClassLoader.prototype.CSSResource = function (rsc) 
+  // register a resource on the class
+  Classloader.prototype.CSSResource = function (rsc) 
   {
     this.currentClass.setResource("CSSResource", rsc);
   };
 
-  ClassLoader.prototype.XMLResource = function (rsc) 
+  // register a resource on the class
+  Classloader.prototype.XMLResource = function (rsc) 
   {
     this.currentClass.setResource("XMLResource", rsc);
   };
 
-  ClassLoader.prototype.getName = function (f) {
+  Classloader.prototype.getMethodName = function (f) {
     var str = f.toString();
     var name = str.substring(str.indexOf(' ')+1, str.indexOf("("));
     if(name == '' || name == ' ')
@@ -107,14 +110,14 @@ var ClassLoader = (function(){
       return name;
   };
 
-  ClassLoader.prototype.namespaces = {};
-  ClassLoader.prototype.Static = "static";
-  ClassLoader.prototype.Protected = "protected";
-  ClassLoader.prototype.Public = "public";
+  Classloader.prototype.namespaces = {};
+  Classloader.prototype.Static = "static";
+  Classloader.prototype.Protected = "protected";
+  Classloader.prototype.Public = "public";
 
 
-  return ClassLoader;
+  return Classloader;
 })();
 
-module.exports = ClassLoader;
+module.exports = Classloader;
 
