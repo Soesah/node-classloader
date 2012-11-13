@@ -12,7 +12,7 @@ var Class = (function(){
 
     this.imports = [];
     this.extend = null;
-    this.dependencies = [];
+    this.dependencies = {};
     this.methods = [];
     this.flag = null;
     this.resolved = false;
@@ -68,13 +68,22 @@ var Class = (function(){
 
   Class.prototype.addDependency = function(className) 
   {
-    this.dependencies.push(className);
+    this.dependencies[className] = true;
   };
 
-  Class.prototype.hasUnresolvedDependencies = function(resolved_classes)
+  Class.prototype.hasUnresolvedDependencies = function(classes)
   {
-
+    for(var namespaceURI in this.dependencies)
+      if(!classes[namespaceURI].isResolved())
+        return true;
+     
+    return false;
   }
+
+  Class.prototype.setResolved = function() 
+  {
+    this.resolved = true;
+  };
 
   Class.prototype.isResolved = function() 
   {

@@ -8,7 +8,9 @@ var Classloader = (function(){
   
   var Classloader = function Classloader()
   {
-    this.classList = [];
+    this.classes = {};
+    this.classOrder = [];
+    this.namespaces = {};
   };
 
   Classloader.prototype.Classloader = Classloader;
@@ -16,10 +18,7 @@ var Classloader = (function(){
   Classloader.prototype.Package = function (namespaceURI)
   {
     // Create a class; a class always starts with a package, subsequent function calls will be applied to this class.
-    var classObject = new ClassObject(namespaceURI);
-
-    this.classList.push(classObject);
-    this.currentClass = classObject;
+    this.currentClass = new ClassObject(namespaceURI);
 
     var namespaces = namespaceURI.split(".");
     var obj = this.namespaces;
@@ -80,7 +79,13 @@ var Classloader = (function(){
       {
         var name = this.getMethodName(arg);
         if(i == 0) // the first method is the constructor 
+        {
           this.currentClass.setConstructor(name, arg);
+
+          // add the class now that we have the full identifier
+          var namespaceURI = this.currentClass.getName();
+          this.classes[namespaceURI] = this.currentClass;
+        }
         else
           this.currentClass.addMethod(name, arg);
       }
@@ -110,10 +115,47 @@ var Classloader = (function(){
       return name;
   };
 
-  Classloader.prototype.namespaces = {};
+  Classloader.prototype.resolveDependencies = function () 
+  {
+    var classes = this.getUnresolvedClasses();
+    var runs = 0;
+    var maxruns = 20;
+    while(classes != 0 && maxruns >= runs)
+    {
+      for (var namespaceURI in classes) 
+      {
+        var c = classes[namespaceURI];
+
+        if(c.hasUnresolvedDependencies(this.classes))
+          continue;
+        else
+        {
+          c.setResolved();
+          // add the classname to an ordered list of classes to render
+          this.classOrder.push(c.getName());
+        }
+      };
+
+      runs++;
+      classes = this.getUnresolvedClasses();
+    }
+  };
+
+  Classloader.prototype.getUnresolvedClasses = function ()
+  {
+    var classes = {};
+    for(var namespaceURI in this.classes)
+      if(!this.classes[namespaceURI].isResolved())
+        classes[namespaceURI] = this.classes[namespaceURI];
+    if (Object.keys(classes).length != 0) 
+      return classes;
+    else
+      return false;
+  }
+
   Classloader.prototype.Static = "static";
-  Classloader.prototype.Protected = "protected";
   Classloader.prototype.Public = "public";
+  Classloader.prototype.Protected = "protected";
 
 
   return Classloader;

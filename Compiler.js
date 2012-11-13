@@ -11,25 +11,31 @@ var Compiler = (function(){
   var Compiler = function Compiler()
   {
     this.classloader = new Classloader();
+
+    this.parse();
+
+    this.classloader.resolveDependencies();
   }
 
   Compiler.prototype.Compiler = Compiler;
 
-  Compiler.prototype.compile = function compile()
+  Compiler.prototype.parse = function compile()
   {
     var code = require(outfile).code;
 
-    var cc = this.classloader;
-
     // register function called in concatenated source as globals, and route them to the right object in the right way
-    Package     = function () {cc.Package.apply(cc, arguments)};
-    Extends     = function () {cc.Extends.apply(cc, arguments)};
-    Import      = function () {cc.Import.apply(cc, arguments)};
-    Class       = function () {cc.Class.apply(cc, arguments)};
-    Singleton   = function () {cc.Singleton.apply(cc, arguments)};
-    Static      = function () {cc.Static.apply(cc, arguments)};
-    XMLResource = function () {cc.XMLResource.apply(cc, arguments)};
-    CSSResource = function () {cc.CSSResource.apply(cc, arguments)};
+    Package     = function () {this.classloader.Package.apply(this.classloader, arguments)};
+    Extends     = function () {this.classloader.Extends.apply(this.classloader, arguments)};
+    Import      = function () {this.classloader.Import.apply(this.classloader, arguments)};
+    Class       = function () {this.classloader.Class.apply(this.classloader, arguments)};
+    Singleton   = function () {this.classloader.Singleton.apply(this.classloader, arguments)};
+    XMLResource = function () {this.classloader.XMLResource.apply(this.classloader, arguments)};
+    CSSResource = function () {this.classloader.CSSResource.apply(this.classloader, arguments)};
+
+    // flags
+    Static      = this.classloader.Static;
+    Public      = this.classloader.Public;
+    Protected   = this.classloader.Protected;
 
     code();
   }
@@ -53,7 +59,4 @@ var Compiler = (function(){
 
 
 var compiler = new Compiler();
-
-compiler.compile();
-console.log(compiler.classloader.classList)
 
