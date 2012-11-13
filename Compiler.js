@@ -12,14 +12,14 @@ var Compiler = (function(){
   {
     this.classloader = new Classloader();
 
-    this.parse();
+    this.compile();
 
     this.classloader.resolveDependencies();
   }
 
   Compiler.prototype.Compiler = Compiler;
 
-  Compiler.prototype.parse = function compile()
+  Compiler.prototype.compile = function ()
   {
     var code = require(outfile).code;
 
