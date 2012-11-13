@@ -7,6 +7,7 @@ var Class = (function(){
 
   var Class = function Class(namespaceURI)
   { 
+    this.name;
     this.namespaceURI = namespaceURI;
 
     this.imports = [];
@@ -21,7 +22,7 @@ var Class = (function(){
 
   Class.prototype.getName = function()
   {
-    return this.namespaceURI + "." +  this.constr.name;
+    return this.namespaceURI + "." +  this.name;
   }
 
   Class.prototype.setSingleton = function() 
@@ -35,6 +36,7 @@ var Class = (function(){
 
   Class.prototype.setConstructor = function(name, f) 
   {
+    this.name = name;
     this.constr = {name: name, method: f};
   };
 
