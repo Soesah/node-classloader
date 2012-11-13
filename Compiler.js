@@ -19,6 +19,18 @@ var Compiler = (function(){
   {
     var code = require(outfile).code;
 
+    var cc = this.classloader;
+
+    // register function called in concatenated source as globals, and route them to the right object in the right way
+    Package     = function () {cc.Package.apply(cc, arguments)};
+    Extends     = function () {cc.Extends.apply(cc, arguments)};
+    Import      = function () {cc.Import.apply(cc, arguments)};
+    Class       = function () {cc.Class.apply(cc, arguments)};
+    Singleton   = function () {cc.Singleton.apply(cc, arguments)};
+    Static      = function () {cc.Static.apply(cc, arguments)};
+    XMLResource = function () {cc.XMLResource.apply(cc, arguments)};
+    CSSResource = function () {cc.CSSResource.apply(cc, arguments)};
+
     code();
   }
 
@@ -41,18 +53,7 @@ var Compiler = (function(){
 
 
 var compiler = new Compiler();
-var cc = compiler.classloader;
-
-// register function called in concatenated source as globals, and route them to the right object in the right way
-Package     = function () {cc.Package.apply(cc, arguments)};
-Extends     = function () {cc.Extends.apply(cc, arguments)};
-Import      = function () {cc.Import.apply(cc, arguments)};
-Class       = function () {cc.Class.apply(cc, arguments)};
-Singleton   = function () {cc.Singleton.apply(cc, arguments)};
-Static      = function () {cc.Static.apply(cc, arguments)};
-XMLResource = function () {cc.XMLResource.apply(cc, arguments)};
-CSSResource = function () {cc.CSSResource.apply(cc, arguments)};
 
 compiler.compile();
-
+console.log(compiler.classloader.classList)
 
