@@ -19,7 +19,7 @@ var Compiler = (function(){
   {
     var code = require(outfile).code;
 
-    code.apply(this.classloader, [this.classloader.Package]);
+    code();
   }
 
   Compiler.prototype.writeNamespaces = function writeNamespaces(namespaces, isroot) 
