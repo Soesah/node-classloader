@@ -2,9 +2,8 @@
  *  Node Classloader Compiler
  */
 
-var sourcePath = "source";
+var sourcePath = process.argv[2];
 var filelist = require('./filelist.js').filelist;
-
 
 var Compiler = (function(){
   
@@ -58,7 +57,7 @@ var Compiler = (function(){
 
 var compiler = new Compiler(sourcePath, filelist);
 
-// register function called in concatenated source as globals, and route them to the right object in the right way
+// globally register functions called in source , and route them to the Classloader
 Package     = function () {compiler.classloader.Package.apply(compiler.classloader, arguments)};
 Extends     = function () {compiler.classloader.Extends.apply(compiler.classloader, arguments)};
 Import      = function () {compiler.classloader.Import.apply(compiler.classloader, arguments)};

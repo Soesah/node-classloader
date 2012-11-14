@@ -54,7 +54,7 @@ Class ClassLoader
   private function nodeCompileCode()
   {
     $val = "";
-    system($this->nodepath."node Compiler.js 2>&1", $val);
+    system($this->nodepath."node Compiler.js ".$this->path." 2>&1", $val);
   }
 
   public function output()
@@ -82,10 +82,13 @@ Class ClassLoader
 
 $package = (isset($_GET["package"]))?$_GET["package"]:"com";
 
-echo "<textarea rows='40' cols='80'>";
 $cl = new ClassLoader("source", $package);
 
+header("Content-type: text/javascript");
+// header("Content-Encoding: gzip");
+
+// ob_start('ob_gzhandler') ;
+
 $cl->output();
-echo "</textarea>";
 
 ?>
