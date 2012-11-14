@@ -1,8 +1,9 @@
+/*
+ *  Node Classloader Compiler
+ */
 
-var encoding = "utf-8";
-var end_of_line = "\n";
-
-var outfile = "./concat.js";
+var source = "./concat.js";
+var sourcePath = "source";
 
 var Compiler = (function(){
   
@@ -10,32 +11,15 @@ var Compiler = (function(){
 
   var Compiler = function Compiler()
   {
-    this.classloader = new Classloader();
-
-    this.compile();
+    this.classloader = new Classloader(sourcePath);
 
     this.classloader.resolveDependencies();
   }
 
   Compiler.prototype.Compiler = Compiler;
 
-  Compiler.prototype.compile = function ()
-  {
-    var code = require(outfile).code;
-
-    // register function called in concatenated source as globals, and route them to the right object in the right way
-    Package     = function () {this.classloader.Package.apply(this.classloader, arguments)};
-    Extends     = function () {this.classloader.Extends.apply(this.classloader, arguments)};
-    Import      = function () {this.classloader.Import.apply(this.classloader, arguments)};
-    Class       = function () {this.classloader.Class.apply(this.classloader, arguments)};
-    Singleton   = function () {this.classloader.Singleton.apply(this.classloader, arguments)};
-    XMLResource = function () {this.classloader.XMLResource.apply(this.classloader, arguments)};
-    CSSResource = function () {this.classloader.CSSResource.apply(this.classloader, arguments)};
-
-    // flags
-    Static      = this.classloader.Static;
-    Public      = this.classloader.Public;
-    Protected   = this.classloader.Protected;
+  Compiler.prototype.compile = function ()  {
+    var code = require(source).code;
 
     code();
   }
@@ -52,7 +36,7 @@ var Compiler = (function(){
     }
 
     return str.substring(0, str.length - 1);
-  };
+  }
 
   return Compiler;
 })();
@@ -60,3 +44,18 @@ var Compiler = (function(){
 
 var compiler = new Compiler();
 
+// register function called in concatenated source as globals, and route them to the right object in the right way
+Package     = function () {compiler.classloader.Package.apply(compiler.classloader, arguments)};
+Extends     = function () {compiler.classloader.Extends.apply(compiler.classloader, arguments)};
+Import      = function () {compiler.classloader.Import.apply(compiler.classloader, arguments)};
+Class       = function () {compiler.classloader.Class.apply(compiler.classloader, arguments)};
+Singleton   = function () {compiler.classloader.Singleton.apply(compiler.classloader, arguments)};
+XMLResource = function () {compiler.classloader.XMLResource.apply(compiler.classloader, arguments)};
+CSSResource = function () {compiler.classloader.CSSResource.apply(compiler.classloader, arguments)};
+
+// flags
+Static      = compiler.classloader.Static;
+Public      = compiler.classloader.Public;
+Protected   = compiler.classloader.Protected;
+
+compiler.compile();

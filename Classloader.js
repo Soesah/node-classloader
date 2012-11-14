@@ -6,8 +6,9 @@ var Classloader = (function(){
 
   var ClassObject = require("./Class.js");
   
-  var Classloader = function Classloader()
+  var Classloader = function Classloader(sourcePath)
   {
+    this.sourcePath = sourcePath;
     this.classes = {};
     this.classOrder = [];
     this.namespaces = {};
@@ -33,7 +34,7 @@ var Classloader = (function(){
       }
       else
         obj = obj[ns];
-    };
+    }
   };
 
   Classloader.prototype.Import = function ()
@@ -43,7 +44,7 @@ var Classloader = (function(){
     {
      var importClass = arguments[i];
      this.currentClass.addImport(importClass);
-    };
+    }
   };
 
   Classloader.prototype.Extends = function ()
@@ -53,7 +54,7 @@ var Classloader = (function(){
     {
      var extendClass = arguments[i];
      this.currentClass.addExtend(extendClass);
-    };  
+    } 
   };
 
   Classloader.prototype.Class = function () 
@@ -91,19 +92,19 @@ var Classloader = (function(){
       }
       else
         this.currentClass.setFlag(arg);        
-    }; 
+    } 
   };
 
   // register a resource on the class
   Classloader.prototype.CSSResource = function (rsc) 
   {
-    this.currentClass.setResource("CSSResource", rsc);
+    this.currentClass.addResource("CSSResource", this.sourcePath, rsc);
   };
 
   // register a resource on the class
   Classloader.prototype.XMLResource = function (rsc) 
   {
-    this.currentClass.setResource("XMLResource", rsc);
+    this.currentClass.addResource("XMLResource", this.sourcePath, rsc);
   };
 
   Classloader.prototype.getMethodName = function (f) {
@@ -134,7 +135,7 @@ var Classloader = (function(){
           // add the classname to an ordered list of classes to render
           this.classOrder.push(c.getName());
         }
-      };
+      }
 
       runs++;
       classes = this.getUnresolvedClasses();

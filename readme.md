@@ -21,6 +21,9 @@ Since you don't want node to be the server, use PHP to call node from commandlin
 Here'a nice writeup of useful things:
 http://blog.millermedeiros.com/node-js-as-a-build-script/
 
+A fun fact about Javascript
+http://www.gibdon.com/2008/08/javascript-constructor-return-value.html
+
 
 
 Notes

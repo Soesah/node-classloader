@@ -1,20 +1,22 @@
 /*
- *  Node Class Loader Class
+ *  Node Classloader Class
  */
 
 var Class = (function(){
   
+  var Resource = require("./Resource.js");
 
   var Class = function Class(namespaceURI)
   { 
     this.name;
     this.namespaceURI = namespaceURI;
 
+    this.dependencies = {};
     this.imports = [];
     this.extend = null;
-    this.dependencies = {};
     this.methods = [];
     this.flag = null;
+    this.resources = [];
     this.resolved = false;
   } 
 
@@ -61,9 +63,10 @@ var Class = (function(){
     this.addDependency(className);
   };
 
-  Class.prototype.setResource = function(name, resource) 
+  Class.prototype.addResource = function(type, sourcePath, file) 
   {
-    this[name] = resource;
+    var path = sourcePath + "/" + this.namespaceURI.replace(/\./g,'/') + "/"+ file;
+    this.resources.push(new Resource(type, path));
   };
 
   Class.prototype.addDependency = function(className) 
