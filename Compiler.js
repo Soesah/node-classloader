@@ -91,7 +91,8 @@ var Compiler = (function(){
     var str = "";
     str += "// " + c.getName() + this.end_of_line;
     str += "if (typeof " + c.getName() + " == 'undefined')" + this.end_of_line;
-    str += c.getName() + " = (function(){" + this.double_end_of_line;
+    str += c.getName() + " = (function()" + this.end_of_line;
+    str += "{" + this.double_end_of_line;
 
     for(var namespaceURI in c.dependencies)
       str += "  var " + this.classloader.classes[namespaceURI].getClassName() + " = " + namespaceURI + ";"+ this.end_of_line;
@@ -111,9 +112,9 @@ var Compiler = (function(){
       if(!method.name) //anonymous functions
         str += "  (" + method.method + ")();" + this.double_end_of_line;
       else if(method.flag == this.classloader.Static) // static methods
-        str += staticstr + method.name + " = " + method.method + this.double_end_of_line;
+        str += staticstr + method.name + " = " + method.method + ";" + this.double_end_of_line;
       else
-        str += prototypestr + method.name + " = " + method.method + this.double_end_of_line;
+        str += prototypestr + method.name + " = " + method.method + ";" + this.double_end_of_line;
     }
       
     str += "  return " + c.getClassName() + ";" + this.double_end_of_line + "})();" + this.double_end_of_line;
