@@ -8,7 +8,7 @@ var Classloader = (function(){
   
   var Classloader = function Classloader(sourcePath)
   {
-    this.version = "0.5";
+    this.version = "1.0";
     this.sourcePath = sourcePath;
     this.classes = {};
     this.classOrder = [];
