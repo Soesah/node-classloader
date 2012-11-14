@@ -8,17 +8,16 @@ var Resource = (function(){
 
   var Resource = function Resource(type, path)
   { 
+    this.encoding = "utf-8";
     this.type = type;
     this.path = path;
-
-    console.log(type, path)
   } 
 
   Resource.prototype.Resource = Resource;
 
   Resource.prototype.getContents = function() 
   {
-    var string;
+    return FileSystem.readFileSync(this.path, this.encoding);
   };
 
   return Resource;
