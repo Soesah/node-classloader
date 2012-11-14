@@ -22,15 +22,21 @@ var Class = (function(){
 
   Class.prototype.Class = Class;
 
+  Class.prototype.getClassName = function()
+  {
+    return this.name;
+  };
+
   Class.prototype.getName = function()
   {
     return this.namespaceURI + "." +  this.name;
-  }
+  };
 
   Class.prototype.setSingleton = function() 
   {
     this.singleton = true;
   };
+
   Class.prototype.setFlag = function(flag) 
   {
     this.flag = flag;
@@ -72,6 +78,14 @@ var Class = (function(){
   Class.prototype.addDependency = function(className) 
   {
     this.dependencies[className] = true;
+  };
+
+  Class.prototype.hasDependencies = function()
+  {
+    if(Object.keys(this.dependencies).length != 0)
+      return true;
+    else
+      return false;
   };
 
   Class.prototype.hasUnresolvedDependencies = function(classes)

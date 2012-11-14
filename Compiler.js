@@ -21,8 +21,6 @@ var Compiler = (function(){
 
     this.classloader = new Classloader(sourcePath);
     this.sourceCode = this.concatenate(filelist)
-
-    this.classloader.resolveDependencies();
   }
 
   Compiler.prototype.Compiler = Compiler;
@@ -38,13 +36,88 @@ var Compiler = (function(){
   Compiler.prototype.compile = function ()  
   {
     eval(this.sourceCode);
-  }
+
+    this.classloader.resolveDependencies();
+  };
 
   Compiler.prototype.output = function() 
   {
-    process.stdout.write("// Node Classloader Version " + this.classloader.version + this.end_of_line + this.end_of_line);
-    process.stdout.write(this.classloader.writeNamespaces(this.classloader.namespaces, true));
-    // process.stdout.write(this.sourceCode);
+    this.double_end_of_line = "\n\n";
+
+    var cl = this.classloader;
+    process.stdout.write("// Node Classloader Version " + cl.version + this.double_end_of_line);
+    process.stdout.write(this.writeExtendsFunction() + this.double_end_of_line);
+    process.stdout.write(this.writeNamespaces(cl.namespaces, true) + this.double_end_of_line);
+
+    for (var i = 0; i < cl.classOrder.length; i++) 
+    {
+      process.stdout.write(this.writeClassDefinition(cl.classes[cl.classOrder[i]]));
+    }
+
+  };
+
+  Compiler.prototype.writeExtendsFunction = function()
+  {
+    return ["Function.prototype.Extends = function(base)", 
+            "{", 
+            "  if(!base)", 
+            "    debugger;", 
+            "  for (var name in base.prototype)", 
+            "  {", 
+            "    if (this.prototype[name]) //if the method exists, declare it as a super method" +this.end_of_line + 
+            "      this.prototype[base.name + \"$\" + name] = base.prototype[name];" +this.end_of_line + 
+            "    else //if the method does not exist, declare it as regular", 
+            "      this.prototype[name] = base.prototype[name];", 
+            "  }", 
+            "} "].join(this.end_of_line) ;
+  };
+
+  Compiler.prototype.writeNamespaces = function (obj, isroot) 
+  {
+    var str = "";
+    for(var name in obj)
+    {
+      if(isroot)
+        str += "var " + name +" = {" + this.writeNamespaces(obj[name])+ "}; ";
+      else
+        str += name +": {" + this.writeNamespaces(obj[name])+ "},";
+    }
+
+    return str.substring(0, str.length - 1);
+  }
+
+  Compiler.prototype.writeClassDefinition = function(c)
+  {
+    var str = "";
+    str += "// " + c.getName() + this.end_of_line;
+    str += "if (typeof " + c.getName() + " == 'undefined')" + this.end_of_line;
+    str += c.getName() + " = (function(){" + this.double_end_of_line;
+
+    for(var namespaceURI in c.dependencies)
+      str += "  var " + this.classloader.classes[namespaceURI].getClassName() + " = " + namespaceURI + ";"+ this.end_of_line;
+    
+    if(c.hasDependencies())
+      str += this.end_of_line;
+
+    str += "  var " + c.getClassName() + " = " + c.constr.method + this.double_end_of_line;
+
+    var prototypestr = "  " + c.getClassName() + ".prototype.";
+    var staticstr = "  " + c.getClassName() + ".";
+    str +=  prototypestr+ c.getClassName() + " = " + c.getClassName() + ";" + this.double_end_of_line;
+
+    for (var i = 0; i < c.methods.length; i++) 
+    {
+      var method = c.methods[i];
+      if(!method.name) //anonymous functions
+        str += "  (" + method.method + ")();" + this.double_end_of_line;
+      else if(method.flag == this.classloader.Static) // static methods
+        str += staticstr + method.name + " = " + method.method + this.double_end_of_line;
+      else
+        str += prototypestr + method.name + " = " + method.method + this.double_end_of_line;
+    }
+      
+    str += "  return " + c.getClassName() + ";" + this.double_end_of_line + "})();" + this.double_end_of_line;
+    return str;
   };
 
   return Compiler;

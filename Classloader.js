@@ -112,7 +112,7 @@ var Classloader = (function(){
     var str = f.toString();
     var name = str.substring(str.indexOf(' ')+1, str.indexOf("("));
     if(name == '' || name == ' ')
-      return name;
+      return false;
     else
       return name;
   };
@@ -153,20 +153,6 @@ var Classloader = (function(){
       return classes;
     else
       return false;
-  }
-
-  Classloader.prototype.writeNamespaces = function (obj, isroot) 
-  {
-    var str = "";
-    for(var name in obj)
-    {
-      if(isroot)
-        str += "var " + name +" = {" + this.writeNamespaces(obj[name])+ "}; ";
-      else
-        str += name +": {" + this.writeNamespaces(obj[name])+ "},";
-    }
-
-    return str.substring(0, str.length - 1);
   }
 
   Classloader.prototype.Static = "static";
