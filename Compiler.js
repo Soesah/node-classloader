@@ -13,7 +13,8 @@ var Compiler = (function(){
   var Compiler = function Compiler(sourcePath, filelist)
   {
     this.encoding = "utf-8";
-    this.end_of_line = "\n";
+    this.EOF = "\n";
+    this.D_EOF = "\n\n";
 
     if(sourcePath == undefined)
       throw new Error("A source must be provided to the Compiler")
@@ -30,7 +31,7 @@ var Compiler = (function(){
     var sources = filelist.map(function(file){
             return FileSystem.readFileSync(file, this.encoding);
           });
-    return sources.join(this.end_of_line);
+    return sources.join(this.EOF);
   };
 
   Compiler.prototype.compile = function ()  
@@ -42,12 +43,11 @@ var Compiler = (function(){
 
   Compiler.prototype.output = function() 
   {
-    this.double_end_of_line = "\n\n";
 
     var cl = this.classloader;
-    process.stdout.write("// Node Classloader Version " + cl.version + this.double_end_of_line);
-    process.stdout.write(this.writeExtendsFunction() + this.double_end_of_line);
-    process.stdout.write(this.writeNamespaces(cl.namespaces, true) + this.double_end_of_line);
+    process.stdout.write("// Node Classloader Version " + cl.version + this.D_EOF);
+    process.stdout.write(this.writeExtendsFunction() + this.D_EOF);
+    process.stdout.write(this.writeNamespaces(cl.namespaces, true) + this.D_EOF);
 
     for (var i = 0; i < cl.classOrder.length; i++) 
     {
@@ -64,12 +64,12 @@ var Compiler = (function(){
             "    debugger;", 
             "  for (var name in base.prototype)", 
             "  {", 
-            "    if (this.prototype[name]) //if the method exists, declare it as a super method" +this.end_of_line + 
-            "      this.prototype[base.name + \"$\" + name] = base.prototype[name];" +this.end_of_line + 
+            "    if (this.prototype[name]) //if the method exists, declare it as a super method" +this.EOF + 
+            "      this.prototype[base.name + \"$\" + name] = base.prototype[name];" +this.EOF + 
             "    else //if the method does not exist, declare it as regular", 
             "      this.prototype[name] = base.prototype[name];", 
             "  }", 
-            "} "].join(this.end_of_line) ;
+            "} "].join(this.EOF) ;
   };
 
   Compiler.prototype.writeNamespaces = function (obj, isroot) 
@@ -89,36 +89,51 @@ var Compiler = (function(){
   Compiler.prototype.writeClassDefinition = function(c)
   {
     var str = "";
-    str += "// " + c.getName() + this.end_of_line;
-    str += "if (typeof " + c.getName() + " == 'undefined')" + this.end_of_line;
-    str += c.getName() + " = (function()" + this.end_of_line;
-    str += "{" + this.double_end_of_line;
+    str += "// " + c.getName() + this.EOF;
+    str += "if (typeof " + c.getName() + " == 'undefined')" + this.EOF;
+    str += c.getName() + " = (function()" + this.EOF;
+    str += "{" + this.D_EOF;
 
     for(var namespaceURI in c.dependencies)
-      str += "  var " + this.classloader.classes[namespaceURI].getClassName() + " = " + namespaceURI + ";"+ this.end_of_line;
+      str += "  var " + this.classloader.classes[namespaceURI].getClassName() + " = " + namespaceURI + ";"+ this.EOF;
     
     if(c.hasDependencies())
-      str += this.end_of_line;
+      str += this.EOF;
 
-    str += "  var " + c.getClassName() + " = " + c.constr.method + this.double_end_of_line;
+    str += "  var " + c.getClassName() + " = " + c.constr.method + this.D_EOF;
 
     var prototypestr = "  " + c.getClassName() + ".prototype.";
     var staticstr = "  " + c.getClassName() + ".";
-    str +=  prototypestr+ c.getClassName() + " = " + c.getClassName() + ";" + this.double_end_of_line;
+    str +=  prototypestr+ c.getClassName() + " = " + c.getClassName() + ";" + this.D_EOF;
 
     for (var i = 0; i < c.methods.length; i++) 
     {
       var method = c.methods[i];
       if(!method.name) //anonymous functions
-        str += "  (" + method.method + ")();" + this.double_end_of_line;
+        str += "  (" + method.method + ")();" + this.D_EOF;
       else if(method.flag == this.classloader.Static) // static methods
-        str += staticstr + method.name + " = " + method.method + ";" + this.double_end_of_line;
+        str += staticstr + method.name + " = " + method.method + ";" + this.D_EOF;
       else
-        str += prototypestr + method.name + " = " + method.method + ";" + this.double_end_of_line;
+        str += prototypestr + method.name + " = " + method.method + ";" + this.D_EOF;
     }
-      
-    str += "  return " + c.getClassName() + ";" + this.double_end_of_line + "})();" + this.double_end_of_line;
+    if(c.extends)  
+      str += "  " + c.getClassName() + ".Extends(" + c.extends +");" + this.D_EOF;
+
+    for (var i = 0; i < c.resources.length; i++)
+      str += "  " + c.getClassName() + "." + c.resources[i].type + " = \"" + this.addSlashes(c.resources[i].getContents().replace(/\r|\n/g, "")) + "\";" + this.D_EOF;
+
+    str += "  if (!" + c.getClassName() + ".name) " + c.getClassName() + ".name = '" +c.getClassName()+ "';" + this.D_EOF;
+
+    if(c.singleton)
+      str += "  return new " + c.getClassName() + "();" + this.D_EOF + "})();" + this.D_EOF;
+    else
+      str += "  return " + c.getClassName() + ";" + this.D_EOF + "})();" + this.D_EOF;
     return str;
+  };
+
+  Compiler.prototype.addSlashes = function (str) 
+  {
+    return (str+'').replace(/([\\"'])/g, "\\$1").replace(/\0/g, "\\0");
   };
 
   return Compiler;

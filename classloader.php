@@ -8,7 +8,7 @@ Class ClassLoader
     $this->path = $path;
     $this->package = $package;
 
-    $this->tempfiles = array("filelist.js", "concat.js");
+    $this->tempfiles = array("filelist.js");
     $this->nodepath = "";
     if(PHP_OS == "Darwin") // Mac OS Apache can't find node without full path
       $this->nodepath = "/usr/local/bin/";
@@ -19,15 +19,13 @@ Class ClassLoader
     // save file list
     $this->saveFileList();
 
-    // get node to compile it
+    // call the compiler
     $this->nodeCompileCode();
 
     // get node to minify it
 
-    // write it out
-
     // clean up
-    // $this->cleanup();
+    $this->cleanup();
 
   }
 
@@ -57,11 +55,6 @@ Class ClassLoader
     system($this->nodepath."node Compiler.js ".$this->path." 2>&1", $val);
   }
 
-  public function output()
-  {
-
-  }
-
   private function glob_deep($pattern = '*', $path, $flags = 0)
   {
     $dirs = glob($path.'*', GLOB_MARK | GLOB_ONLYDIR | GLOB_NOSORT);
@@ -82,14 +75,12 @@ Class ClassLoader
 
 $package = (isset($_GET["package"]))?$_GET["package"]:"com";
 
+header("Content-type:application/x-javascript ; charset=utf-8");
 header("Content-type: text/javascript");
-// header("Content-Encoding: gzip");
+header("Content-Encoding: gzip");
 
-// ob_start('ob_gzhandler') ;
+ob_start('ob_gzhandler') ;
 
 $cl = new ClassLoader("source", $package);
-
-
-$cl->output();
 
 ?>

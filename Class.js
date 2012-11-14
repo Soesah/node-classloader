@@ -13,7 +13,7 @@ var Class = (function(){
 
     this.dependencies = {};
     this.imports = [];
-    this.extend = null;
+    this.extends = null;
     this.methods = [];
     this.flag = null;
     this.resources = [];
@@ -65,7 +65,7 @@ var Class = (function(){
 
   Class.prototype.addExtend = function(className) 
   {
-    this.extend = className;
+    this.extends = className;
     this.addDependency(className);
   };
 
