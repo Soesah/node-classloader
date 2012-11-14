@@ -82,12 +82,13 @@ Class ClassLoader
 
 $package = (isset($_GET["package"]))?$_GET["package"]:"com";
 
-$cl = new ClassLoader("source", $package);
-
 header("Content-type: text/javascript");
 // header("Content-Encoding: gzip");
 
 // ob_start('ob_gzhandler') ;
+
+$cl = new ClassLoader("source", $package);
+
 
 $cl->output();
 

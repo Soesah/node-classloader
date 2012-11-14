@@ -12,6 +12,12 @@ var Compiler = (function(){
 
   var Compiler = function Compiler(sourcePath, filelist)
   {
+    this.encoding = "utf-8";
+    this.end_of_line = "\n";
+
+    if(sourcePath == undefined)
+      throw new Error("A source must be provided to the Compiler")
+
 
     this.classloader = new Classloader(sourcePath);
     this.sourceCode = this.concatenate(filelist)
@@ -23,13 +29,10 @@ var Compiler = (function(){
 
   Compiler.prototype.concatenate = function(filelist)
   {
-    var encoding = "utf-8";
-    var end_of_line = "\n";
-
     var sources = filelist.map(function(file){
-            return FileSystem.readFileSync(file, encoding);
+            return FileSystem.readFileSync(file, this.encoding);
           });
-    return sources.join(end_of_line);
+    return sources.join(this.end_of_line);
   };
 
   Compiler.prototype.compile = function ()  
@@ -37,19 +40,12 @@ var Compiler = (function(){
     eval(this.sourceCode);
   }
 
-  Compiler.prototype.writeNamespaces = function writeNamespaces(namespaces, isroot) 
+  Compiler.prototype.output = function() 
   {
-    var str = "";
-    for(var name in namespaces)
-    {
-      if(isroot)
-        str += "var " + name +" = {" + writeNamespaces(namespaces[name])+ "}; ";
-      else
-        str += name +": {" + writeNamespaces(namespaces[name])+ "},";
-    }
-
-    return str.substring(0, str.length - 1);
-  }
+    process.stdout.write("// Node Classloader Version " + this.classloader.version + this.end_of_line + this.end_of_line);
+    process.stdout.write(this.classloader.writeNamespaces(this.classloader.namespaces, true));
+    // process.stdout.write(this.sourceCode);
+  };
 
   return Compiler;
 })();
@@ -72,3 +68,4 @@ Public      = compiler.classloader.Public;
 Protected   = compiler.classloader.Protected;
 
 compiler.compile();
+compiler.output();

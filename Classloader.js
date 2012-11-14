@@ -8,6 +8,7 @@ var Classloader = (function(){
   
   var Classloader = function Classloader(sourcePath)
   {
+    this.version = "0.5";
     this.sourcePath = sourcePath;
     this.classes = {};
     this.classOrder = [];
@@ -154,10 +155,23 @@ var Classloader = (function(){
       return false;
   }
 
+  Classloader.prototype.writeNamespaces = function (obj, isroot) 
+  {
+    var str = "";
+    for(var name in obj)
+    {
+      if(isroot)
+        str += "var " + name +" = {" + this.writeNamespaces(obj[name])+ "}; ";
+      else
+        str += name +": {" + this.writeNamespaces(obj[name])+ "},";
+    }
+
+    return str.substring(0, str.length - 1);
+  }
+
   Classloader.prototype.Static = "static";
   Classloader.prototype.Public = "public";
   Classloader.prototype.Protected = "protected";
-
 
   return Classloader;
 })();
