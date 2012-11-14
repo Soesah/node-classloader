@@ -67,7 +67,10 @@ The classloader supports Class or Singleton, Importing and Extending other class
 > })();
 
 
-TODO
+## Todo
 - make it capable of getting a root package, to do unit testing
 - throw more errors when you write improper classes
 - set up unit testing of a sort.
+- implement crypting
+- implement building
+- implement minifying (isn't that the same as crypting?)
