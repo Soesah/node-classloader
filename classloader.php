@@ -19,9 +19,6 @@ Class ClassLoader
     // save file list
     $this->saveFileList();
 
-    // get node to concatenate this
-    $this->nodeConcatenateCode();
-
     // get node to compile it
     $this->nodeCompileCode();
 
@@ -52,13 +49,6 @@ Class ClassLoader
     }
     fwrite($fh, "];\n");
     fclose($fh);    
-  }
-
-  // TODO refactor this to one step that calls node with the list, and then reads the final file
-  private function nodeConcatenateCode()
-  {
-    $val = "";
-    system($this->nodepath."node Concatenator.js 2>&1", $val);
   }
 
   private function nodeCompileCode()

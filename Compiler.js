@@ -2,26 +2,40 @@
  *  Node Classloader Compiler
  */
 
-var source = "./concat.js";
 var sourcePath = "source";
+var filelist = require('./filelist.js').filelist;
+
 
 var Compiler = (function(){
   
   var Classloader = require('./Classloader.js');
+  var FileSystem = require('fs');
 
-  var Compiler = function Compiler()
+  var Compiler = function Compiler(sourcePath, filelist)
   {
+
     this.classloader = new Classloader(sourcePath);
+    this.sourceCode = this.concatenate(filelist)
 
     this.classloader.resolveDependencies();
   }
 
   Compiler.prototype.Compiler = Compiler;
 
-  Compiler.prototype.compile = function ()  {
-    var code = require(source).code;
+  Compiler.prototype.concatenate = function(filelist)
+  {
+    var encoding = "utf-8";
+    var end_of_line = "\n";
 
-    code();
+    var sources = filelist.map(function(file){
+            return FileSystem.readFileSync(file, encoding);
+          });
+    return sources.join(end_of_line);
+  };
+
+  Compiler.prototype.compile = function ()  
+  {
+    eval(this.sourceCode);
   }
 
   Compiler.prototype.writeNamespaces = function writeNamespaces(namespaces, isroot) 
@@ -42,7 +56,7 @@ var Compiler = (function(){
 })();
 
 
-var compiler = new Compiler();
+var compiler = new Compiler(sourcePath, filelist);
 
 // register function called in concatenated source as globals, and route them to the right object in the right way
 Package     = function () {compiler.classloader.Package.apply(compiler.classloader, arguments)};
