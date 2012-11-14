@@ -1,31 +1,73 @@
-Node ClassLoader
+# Node ClassLoader
 
-Why Node? Something new to learn, and it being js, it should be able to handle js.
+This is a Javascript classloader that converts easy to read (and valid) Javascript in functioning and executable Javascript.
 
-As before, with the PHP version:
+The classloader uses a php script to do 2 things:
+- use glob to get all the source files into a list of files
+- output the compiled code as Javascript to the browser. I didn't feel like using a NodeJS server for that.
 
-0. Setup
-  - Create a file that is in the format you want
-  - Create a file in the format it should be
-1. Load all js files from source 
-  - load them as javascript, and be able to write them out again
-2. Parse packages
-  - Build objects by the called functions
-3. Resolve dependencies
-4. Declare Namespaces
-5. Write inheritence function
-6. Write the source to the output
+The php calls does a command line call to NodeJS to run the Compiler.
 
-Since you don't want node to be the server, use PHP to call node from commandline
+The Compiler manages the writing, and uses the real Classloader to parse the original Javascript. A class looks something like this:
 
-Here'a nice writeup of useful things:
-http://blog.millermedeiros.com/node-js-as-a-build-script/
+## Example source code
 
-A fun fact about Javascript
-http://www.gibdon.com/2008/08/javascript-constructor-return-value.html
+> Package("com.namespace.package")
+> 
+> Import("com.namespace.object.Object");
+> 
+> Extends("com.namespace.box.Box");
+>
+> Class
+> (
+>  
+>   function Package()
+>   {
+>     this.Box();  
+>   }
+>
+>   function method()
+>   {
+>     this.Box.stuff(new Object);  
+>   }
+>
+> )
+
+The classloader supports Class or Singleton, Importing and Extending other classes, and the Static flag for a method:
+
+> Static, function wrap()
+> {
+>  
+> }
+
+## Example output
+
+> if(typeof com.namespace.package.Package == undefined)
+> com.namespace.package.Package = (function(){
+> 
+>   var Object = com.namespace.object.Object;
+>   var Box = com.namespace.box.Box;
+> 
+>   var Package = function Package()
+>   {
+>     this.Box()
+>   }
+>
+>   Package.prototype.Package = Package;
+>
+>   Package.prototype.method = function method()
+>   {
+>     this.Box.stuff(new Object);  
+>   }
+>
+>   Package.Extends(com.namespace.box.Box);
+>
+>   return Box;
+>
+> })();
 
 
-
-Notes
+TODO
 - make it capable of getting a root package, to do unit testing
+- throw more errors when you write improper classes
 - set up unit testing of a sort.
