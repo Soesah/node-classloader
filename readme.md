@@ -115,10 +115,7 @@ com.something.components.thing.Thing = (function() {
 </pre>
 
 ## Todo
-V- Phase out Compiler
-V - write simple glob to get rid of as much php as possible
 - write down demands on code and source folders and packages
-V- make it capable of getting a root package, to do unit testing
 - throw more errors when you write improper classes
 - set up unit testing of a sort.
 - implement crypting
