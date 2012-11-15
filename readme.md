@@ -105,7 +105,7 @@ com.something.components.thing.Thing = (function() {
   Thing.CSSResource = "xml {font-family:arial;}";
   
   /* Set a name property on the Class */
-  if (!DOMCompat.name) DOMCompat.name = 'DOMCompat';
+  if (!Thing.name) Thing.name = 'Thing';
   
   /* This completes the Class */
   return Thing;
