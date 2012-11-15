@@ -3,7 +3,7 @@
  */
 
 var sourcePath = process.argv[2];
-
+var package = process.argv[3];
 
 var Classloader = (function(){
 
@@ -11,14 +11,15 @@ var Classloader = (function(){
   var FileSystem = require('fs');
   var ClassObject = require("./Class.js");
   
-  var Classloader = function Classloader(sourcePath)
+  var Classloader = function Classloader(sourcePath, package)
   {
     this.version = "1.1";
 
-    if(sourcePath == undefined)
-      throw new Error("A source must be provided to the Compiler")
+    if(sourcePath == undefined || package == undefined)
+      throw new Error("Classloader requires a source folder and package name")
 
     this.sourcePath = sourcePath;
+    this.package = package;
     this.classes = {};
     this.classOrder = [];
     this.namespaces = {};
@@ -27,7 +28,7 @@ var Classloader = (function(){
     this.EOF = "\n";
     this.D_EOF = "\n\n";
 
-    this.filelist = new Glob(sourcePath, ".js").getList();
+    this.filelist = new Glob(sourcePath + "/" + this.package.replace(/\./g, "/"), ".js").getList();
 
     this.sourceCode = this.getSourceContent(this.filelist);
   };
@@ -191,7 +192,7 @@ var Classloader = (function(){
     this.resolveDependencies();
   };
 
-  Classloader.prototype.output = function() 
+  Classloader.prototype.writeOutput = function() 
   {    
     process.stdout.write("// Node Classloader Version " + this.version + this.D_EOF);
     process.stdout.write(this.writeExtendsFunction() + this.D_EOF);
@@ -280,7 +281,7 @@ var Classloader = (function(){
 })();
 
 
-var classloader = new Classloader(sourcePath);
+var classloader = new Classloader(sourcePath, package);
 
 // globally register functions called in source , and route them to the Classloader
 Package     = function () { classloader.Package.apply(classloader, arguments)};
@@ -297,4 +298,4 @@ Public      = classloader.Public;
 Protected   = classloader.Protected;
 
 classloader.compile();
-classloader.output();
+classloader.writeOutput();
