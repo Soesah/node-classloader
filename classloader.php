@@ -1,7 +1,6 @@
 <?php 
 
-
-Class ClassLoader
+Class Classloader
 {
   function __construct($path, $package)
   {
@@ -17,19 +16,19 @@ Class ClassLoader
 
   private function nodeClassloader()
   {
-    system($this->nodepath."node Compiler.js ".$this->path." 2>&1");
+    system($this->nodepath."node Classloader.js ".$this->path." ".$this->package." 2>&1");
   }
-
 }
 
+$path = "source";
 $package = (isset($_GET["package"]))?$_GET["package"]:"com";
 
 header("Content-type:application/x-javascript ; charset=utf-8");
 header("Content-type: text/javascript");
-header("Content-Encoding: gzip");
 
+header("Content-Encoding: gzip");
 ob_start('ob_gzhandler') ;
 
-$cl = new ClassLoader("source", $package);
+new Classloader($path, $package);
 
 ?>

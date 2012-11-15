@@ -118,7 +118,7 @@ The classloader supports Class or Singleton, Importing and Extending other class
 
 ## Todo
 - Phase out Compiler
-- write simple glob to get rid of as much php as possible
+V - write simple glob to get rid of as much php as possible
 - write down demands on code and source folders and packagesgit
 - make it capable of getting a root package, to do unit testing
 - throw more errors when you write improper classes

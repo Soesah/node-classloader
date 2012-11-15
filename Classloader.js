@@ -2,17 +2,34 @@
  *  Node Classloader
  */
 
+var sourcePath = process.argv[2];
+
+
 var Classloader = (function(){
 
+  var Glob = require('./Glob.js');
+  var FileSystem = require('fs');
   var ClassObject = require("./Class.js");
   
   var Classloader = function Classloader(sourcePath)
   {
-    this.version = "1.0";
+    this.version = "1.1";
+
+    if(sourcePath == undefined)
+      throw new Error("A source must be provided to the Compiler")
+
     this.sourcePath = sourcePath;
     this.classes = {};
     this.classOrder = [];
     this.namespaces = {};
+
+    this.encoding = "utf-8";
+    this.EOF = "\n";
+    this.D_EOF = "\n\n";
+
+    this.filelist = new Glob(sourcePath, ".js").getList();
+
+    this.sourceCode = this.getSourceContent(this.filelist);
   };
 
   Classloader.prototype.Classloader = Classloader;
@@ -71,6 +88,22 @@ var Classloader = (function(){
     this.parseMethods(arguments);
   };
 
+  // register a resource on the class
+  Classloader.prototype.CSSResource = function (rsc) 
+  {
+    this.currentClass.addResource("CSSResource", this.sourcePath, rsc);
+  };
+
+  // register a resource on the class
+  Classloader.prototype.XMLResource = function (rsc) 
+  {
+    this.currentClass.addResource("XMLResource", this.sourcePath, rsc);
+  };
+
+  Classloader.prototype.Static = "static";
+  Classloader.prototype.Public = "public";
+  Classloader.prototype.Protected = "protected";
+
   Classloader.prototype.parseMethods = function (args) 
   {
     // Parse the methods in the class
@@ -94,18 +127,6 @@ var Classloader = (function(){
       else
         this.currentClass.setFlag(arg);        
     } 
-  };
-
-  // register a resource on the class
-  Classloader.prototype.CSSResource = function (rsc) 
-  {
-    this.currentClass.addResource("CSSResource", this.sourcePath, rsc);
-  };
-
-  // register a resource on the class
-  Classloader.prototype.XMLResource = function (rsc) 
-  {
-    this.currentClass.addResource("XMLResource", this.sourcePath, rsc);
   };
 
   Classloader.prototype.getMethodName = function (f) {
@@ -153,14 +174,127 @@ var Classloader = (function(){
       return classes;
     else
       return false;
+  };
+
+  Classloader.prototype.getSourceContent = function(filelist)
+  {
+    var sources = filelist.map(function(file){
+            return FileSystem.readFileSync(file, this.encoding);
+          });
+    return sources.join(this.EOF);
+  };
+
+  Classloader.prototype.compile = function ()  
+  {
+    eval(this.sourceCode);
+
+    this.resolveDependencies();
+  };
+
+  Classloader.prototype.output = function() 
+  {    
+    process.stdout.write("// Node Classloader Version " + this.version + this.D_EOF);
+    process.stdout.write(this.writeExtendsFunction() + this.D_EOF);
+    process.stdout.write(this.writeNamespaces(this.namespaces, true) + this.D_EOF);
+
+    for (var i = 0; i < this.classOrder.length; i++) 
+      process.stdout.write(this.writeClassDefinition(this.classes[this.classOrder[i]]));
+  };
+
+  Classloader.prototype.writeExtendsFunction = function()
+  {
+    return ["Function.prototype.Extends = function(base)", 
+            "{", 
+            "  if(!base)", 
+            "    debugger;", 
+            "  for (var name in base.prototype)", 
+            "  {", 
+            "    if (this.prototype[name]) //if the method exists, declare it as a super method" +this.EOF + 
+            "      this.prototype[base.name + \"$\" + name] = base.prototype[name];" +this.EOF + 
+            "    else //if the method does not exist, declare it as regular", 
+            "      this.prototype[name] = base.prototype[name];", 
+            "  }", 
+            "} "].join(this.EOF) ;
+  };
+
+  Classloader.prototype.writeNamespaces = function (obj, isroot) 
+  {
+    var str = "";
+    for(var name in obj)
+    {
+      if(isroot)
+        str += "var " + name +" = {" + this.writeNamespaces(obj[name])+ "}; ";
+      else
+        str += name +": {" + this.writeNamespaces(obj[name])+ "},";
+    }
+
+    return str.substring(0, str.length - 1);
   }
 
-  Classloader.prototype.Static = "static";
-  Classloader.prototype.Public = "public";
-  Classloader.prototype.Protected = "protected";
+  Classloader.prototype.writeClassDefinition = function(c)
+  {
+    var str = "";
+    str += "// " + c.getName() + this.EOF;
+    str += "if (typeof " + c.getName() + " == 'undefined')" + this.EOF;
+    str += c.getName() + " = (function()" + this.EOF;
+    str += "{" + this.D_EOF;
+
+    for(var namespaceURI in c.dependencies)
+      str += "  var " + this.classes[namespaceURI].getClassName() + " = " + namespaceURI + ";"+ this.EOF;
+    
+    if(c.hasDependencies())
+      str += this.EOF;
+
+    str += "  var " + c.getClassName() + " = " + c.constr.method + this.D_EOF;
+
+    var prototypestr = "  " + c.getClassName() + ".prototype.";
+    var staticstr = "  " + c.getClassName() + ".";
+    str +=  prototypestr+ c.getClassName() + " = " + c.getClassName() + ";" + this.D_EOF;
+
+    for (var i = 0; i < c.methods.length; i++) 
+    {
+      var method = c.methods[i];
+      if(!method.name) //anonymous functions
+        str += "  (" + method.method + ")();" + this.D_EOF;
+      else if(method.flag == this.Static) // static methods
+        str += staticstr + method.name + " = " + method.method + ";" + this.D_EOF;
+      else
+        str += prototypestr + method.name + " = " + method.method + ";" + this.D_EOF;
+    }
+    if(c.extends)  
+      str += "  " + c.getClassName() + ".Extends(" + c.extends +");" + this.D_EOF;
+
+    for (var i = 0; i < c.resources.length; i++)
+      str += "  " + c.getClassName() + "." + c.resources[i].type + " = \"" + c.resources[i].getContents() + "\";" + this.D_EOF;
+
+    str += "  if (!" + c.getClassName() + ".name) " + c.getClassName() + ".name = '" +c.getClassName()+ "';" + this.D_EOF;
+
+    if(c.singleton)
+      str += "  return new " + c.getClassName() + "();" + this.D_EOF + "})();" + this.D_EOF;
+    else
+      str += "  return " + c.getClassName() + ";" + this.D_EOF + "})();" + this.D_EOF;
+    return str;
+  };
 
   return Classloader;
 })();
 
-module.exports = Classloader;
 
+var classloader = new Classloader(sourcePath);
+
+// globally register functions called in source , and route them to the Classloader
+Package     = function () { classloader.Package.apply(classloader, arguments)};
+Extends     = function () { classloader.Extends.apply(classloader, arguments)};
+Import      = function () { classloader.Import.apply(classloader, arguments)};
+Class       = function () { classloader.Class.apply(classloader, arguments)};
+Singleton   = function () { classloader.Singleton.apply(classloader, arguments)};
+XMLResource = function () { classloader.XMLResource.apply(classloader, arguments)};
+CSSResource = function () { classloader.CSSResource.apply(classloader, arguments)};
+
+// flags
+Static      = classloader.Static;
+Public      = classloader.Public;
+Protected   = classloader.Protected;
+
+classloader.compile();
+classloader.output();
