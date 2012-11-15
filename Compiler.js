@@ -3,7 +3,7 @@
  */
 
 var sourcePath = process.argv[2];
-var filelist = require('./filelist.js').filelist;
+var Glob = require('./Glob.js');
 
 var Compiler = (function(){
   
@@ -139,7 +139,7 @@ var Compiler = (function(){
   return Compiler;
 })();
 
-
+var filelist = new Glob("source", ".js").getList();
 var compiler = new Compiler(sourcePath, filelist);
 
 // globally register functions called in source , and route them to the Classloader
