@@ -2,13 +2,9 @@
 
 This is a Javascript classloader that converts easy to read (and valid) Javascript in functioning and executable Javascript.
 
-The classloader uses a php script to do 2 things:
-- use glob to get all the source files into a list of files
-- output the compiled code as Javascript to the browser. I didn't feel like using a NodeJS server for that.
+The classloader uses a php script to output the compiled code as Javascript to the browser. I didn't feel like using a NodeJS server for that. The php calls does a command line call to NodeJS to run the Classloader.
 
-The php calls does a command line call to NodeJS to run the Compiler.
-
-The Compiler manages the writing, and uses the real Classloader to parse the original Javascript. A class looks something like this:
+The Classloader parses the original Javascript. Resolves dependencies and finally writes the output. The Classloader compiles classes that follow the format below. 
 
 ## Example source code
 
@@ -121,7 +117,7 @@ com.something.components.thing.Thing = (function() {
 ## Todo
 V- Phase out Compiler
 V - write simple glob to get rid of as much php as possible
-- write down demands on code and source folders and packagesgit
+- write down demands on code and source folders and packages
 V- make it capable of getting a root package, to do unit testing
 - throw more errors when you write improper classes
 - set up unit testing of a sort.
