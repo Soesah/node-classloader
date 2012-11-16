@@ -121,7 +121,14 @@ com.something.components.thing.Thing = (function() {
 
 ## Todo
 - parse comments out of the source
+  - this requires parsing the code as a string. 
+  - Comments outside of methods are already parsed out, comments inside functions are not
 - implement building
+  - building means outputting a js file
 - implement crypting
+  - crypting is accomplished by changing the names of objects and methods and properties to something shorter
+  - this may means parsing methods in order to crypt them
 - implement minifying (isn't that the same as crypting?)
-- set up unit testing of a sort.
+  - you could remove unnecessary whitespace
+- set up unit testing of a sort
+  - you could even run this from NodeJS
