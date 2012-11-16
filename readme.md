@@ -6,6 +6,12 @@ The classloader uses a php script to output the compiled code as Javascript to t
 
 The Classloader parses the original Javascript. Resolves dependencies and finally writes the output. The Classloader compiles classes that follow the format below. 
 
+## Configuration
+
+classloader.php contains two variables, path and package. Path is configured in classloader and refers to the source directory that the Classloader will scan for classes. The default for this is 'source' Package refers to a the package name. You can load smaller packages from the source. The default is 'com'.
+
+Below you can find how to write a class, and what the Classloader does with it.
+
 ## Example source code
 
 <pre>
@@ -114,7 +120,6 @@ com.something.components.thing.Thing = (function() {
 </pre>
 
 ## Todo
-- write down demands on code and source folders and packages
 - throw more errors when you write improper classes
 - set up unit testing of a sort.
 - implement crypting
