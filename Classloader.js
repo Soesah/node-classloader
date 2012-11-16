@@ -138,8 +138,15 @@ var Classloader = (function(){
         else
           this.currentClass.addMethod(name, arg);
       }
-      else
+      else if(typeof arg == "object")
+      {
+        for(var name in arg)
+          this.currentClass.setProperty(name, arg[name])
+      }
+      else if (typeof arg == "string")
         this.currentClass.setFlag(arg);        
+      else
+        throw new Error("Class could not parse object of type " + (typeof arg));
     } 
   };
 
@@ -285,6 +292,10 @@ var Classloader = (function(){
 
     for (var i = 0; i < c.resources.length; i++)
       str += "  " + c.getClassName() + "." + c.resources[i].type + " = \"" + c.resources[i].getContents() + "\";" + this.D_EOF;
+
+    for(var name in c.getProperties())
+      str += "  " + c.getClassName() + "." + name + " = " + c.getProperty(name) + ";" + this.EOF;
+    str += this.EOF;
 
     str += "  if (!" + c.getClassName() + ".name) " + c.getClassName() + ".name = '" +c.getClassName()+ "';" + this.D_EOF;
 

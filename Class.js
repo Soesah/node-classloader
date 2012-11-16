@@ -11,12 +11,14 @@ var Class = (function(){
     this.name;
     this.namespaceURI = namespaceURI;
 
+    this.resources = [];
     this.dependencies = {};
     this.imports = [];
     this.extends = null;
     this.methods = [];
+    this.properties = {};
+
     this.flag = null;
-    this.resources = [];
     this.resolved = false;
   } 
 
@@ -31,6 +33,21 @@ var Class = (function(){
   {
     return this.namespaceURI + "." +  this.name;
   };
+
+  Class.prototype.setProperty = function(name, value)
+  {
+    this.properties[name] = value;
+  }
+
+  Class.prototype.getProperty = function(name)
+  {
+    return this.properties[name];
+  }
+
+  Class.prototype.getProperties = function()
+  {
+    return this.properties;
+  }
 
   Class.prototype.setSingleton = function() 
   {
