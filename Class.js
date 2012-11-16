@@ -49,6 +49,11 @@ var Class = (function(){
     return this.properties;
   }
 
+  Class.prototype.hasProperties = function()
+  {
+    return !this.isEmpty(this.properties);
+  }
+
   Class.prototype.setSingleton = function() 
   {
     this.singleton = true;
@@ -99,7 +104,12 @@ var Class = (function(){
 
   Class.prototype.hasDependencies = function()
   {
-    if(Object.keys(this.dependencies).length != 0)
+    return !this.isEmpty(this.dependencies);
+  };
+
+  Class.prototype.isEmpty = function(obj) 
+  {
+    if(Object.keys(obj).length == 0)
       return true;
     else
       return false;

@@ -120,8 +120,8 @@ com.something.components.thing.Thing = (function() {
 </pre>
 
 ## Todo
-- throw more errors when you write improper classes
-- set up unit testing of a sort.
-- implement crypting
+- parse comments out of the source
 - implement building
+- implement crypting
 - implement minifying (isn't that the same as crypting?)
+- set up unit testing of a sort.

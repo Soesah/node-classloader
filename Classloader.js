@@ -295,7 +295,8 @@ var Classloader = (function(){
 
     for(var name in c.getProperties())
       str += "  " + c.getClassName() + "." + name + " = " + c.getProperty(name) + ";" + this.EOF;
-    str += this.EOF;
+    if(c.hasProperties())
+      str += this.EOF;
 
     str += "  if (!" + c.getClassName() + ".name) " + c.getClassName() + ".name = '" +c.getClassName()+ "';" + this.D_EOF;
 
