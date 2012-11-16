@@ -91,9 +91,15 @@ var Class = (function(){
   Class.prototype.hasUnresolvedDependencies = function(classes)
   {
     for(var namespaceURI in this.dependencies)
-      if(!classes[namespaceURI].isResolved())
-        return true;
-     
+    {
+      if(classes[namespaceURI])
+      {
+        if(!classes[namespaceURI].isResolved())
+          return true;
+      }
+      else
+        throw new Error("Could not resolve a dependency on namespace '" + namespaceURI + "'");        
+    } 
     return false;
   }
 

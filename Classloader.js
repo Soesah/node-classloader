@@ -16,7 +16,7 @@ var Classloader = (function(){
     this.version = "1.1";
 
     if(sourcePath == undefined || package == undefined)
-      throw new Error("Classloader requires a source folder and package name")
+      throw new Error("Classloader requires a source folder and package name");
 
     this.sourcePath = sourcePath;
     this.package = package;
@@ -30,6 +30,9 @@ var Classloader = (function(){
 
     this.filelist = new Glob(sourcePath + "/" + this.package.replace(/\./g, "/"), ".js").getList();
 
+    if(this.filelist.length == 0)
+      throw new Error("Found no files to compile");
+
     this.sourceCode = this.getSourceContent(this.filelist);
   };
 
@@ -37,6 +40,9 @@ var Classloader = (function(){
 
   Classloader.prototype.Package = function (namespaceURI)
   {
+    if(namespaceURI == "")
+      throw new Error("Package namespaceURI cannot be empty");
+
     // Create a class; a class always starts with a package, subsequent function calls will be applied to this class.
     this.currentClass = new ClassObject(namespaceURI);
 
@@ -107,15 +113,22 @@ var Classloader = (function(){
 
   Classloader.prototype.parseMethods = function (args) 
   {
+
+    if(typeof args[0] !== "function")
+      throw new Error("First argument of Class should be a function");
+
     // Parse the methods in the class
     for (var i = 0; i < args.length; i++) 
     {
       var arg = args[i];
-      if(typeof arg == 'function')
+      if(typeof arg == "function")
       {
         var name = this.getMethodName(arg);
         if(i == 0) // the first method is the constructor 
         {
+          if(name == "")
+            throw new Error("First method of a class should carry the Class name");
+
           this.currentClass.setConstructor(name, arg);
 
           // add the class now that we have the full identifier
@@ -163,6 +176,9 @@ var Classloader = (function(){
       runs++;
       classes = this.getUnresolvedClasses();
     }
+    if(this.getUnresolvedClasses())
+      throw new Error("Could not resolve all classes within 20 runs");
+
   };
 
   Classloader.prototype.getUnresolvedClasses = function ()
@@ -170,7 +186,9 @@ var Classloader = (function(){
     var classes = {};
     for(var namespaceURI in this.classes)
       if(!this.classes[namespaceURI].isResolved())
-        classes[namespaceURI] = this.classes[namespaceURI];
+        classes[namespaceURI] = this.classes[namespaceURI];    
+    if(!this.classes[namespaceURI].isResolved())
+      classes[namespaceURI] = this.classes[namespaceURI];
     if (Object.keys(classes).length != 0) 
       return classes;
     else
