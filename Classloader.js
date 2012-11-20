@@ -13,7 +13,7 @@ var Classloader = (function(){
   
   var Classloader = function Classloader(sourcePath, package)
   {
-    this.version = "1.1";
+    this.version = "1.2";
 
     if(sourcePath == undefined || package == undefined)
       throw new Error("Classloader requires a source folder and package name");
@@ -107,6 +107,7 @@ var Classloader = (function(){
     this.currentClass.addResource("XMLResource", this.sourcePath, rsc);
   };
 
+  Classloader.prototype.Abstract = "abstract";
   Classloader.prototype.Static = "static";
   Classloader.prototype.Public = "public";
   Classloader.prototype.Protected = "protected";
@@ -323,6 +324,7 @@ XMLResource = function () { classloader.XMLResource.apply(classloader, arguments
 CSSResource = function () { classloader.CSSResource.apply(classloader, arguments)};
 
 // flags
+Abstract    = classloader.Abstract;
 Static      = classloader.Static;
 Public      = classloader.Public;
 Protected   = classloader.Protected;
