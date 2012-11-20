@@ -8,7 +8,7 @@ The Classloader parses the original Javascript. Resolves dependencies and finall
 
 ## Configuration
 
-classloader.php contains two variables, path and package. Path is configured in classloader and refers to the source directory that the Classloader will scan for classes. The default for this is 'source' Package refers to a the package name. You can load smaller packages from the source. The default is 'com'.
+<code>classloader.php</code> contains two variables, path and package. Path is configured in classloader and refers to the source directory that the Classloader will scan for classes. The default for this is '<i>source</i>' Package refers to a the package name. You can load smaller packages from the source. The default is '<i>com</i>'.
 
 Below you can find how to write a class, and what the Classloader does with it.
 
