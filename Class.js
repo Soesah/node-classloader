@@ -125,7 +125,7 @@ var Class = (function(){
           return true;
       }
       else
-        throw new Error("Could not resolve a dependency on namespace '" + namespaceURI + "'");        
+        throw new Error(this.name + " could not resolve a dependency on namespace '" + namespaceURI + "'");        
     } 
     return false;
   }
