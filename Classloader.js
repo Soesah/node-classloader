@@ -220,6 +220,7 @@ var Classloader = (function(){
 
   Classloader.prototype.writeOutput = function() 
   {    
+    process.stdout.write("\"use strict\";");
     process.stdout.write("// Node Classloader Version " + this.version + this.D_EOF);
     process.stdout.write(this.writeExtendsFunction() + this.D_EOF);
     process.stdout.write(this.writeNamespaces(this.namespaces, true) + this.D_EOF);
