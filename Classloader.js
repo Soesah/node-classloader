@@ -13,7 +13,7 @@ var Classloader = (function(){
   
   var Classloader = function Classloader(sourcePath, package)
   {
-    this.version = "1.2";
+    this.version = "1.3";
 
     if(sourcePath == undefined || package == undefined)
       throw new Error("Classloader requires a source folder and package name");
