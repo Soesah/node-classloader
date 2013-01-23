@@ -78,7 +78,7 @@ var Classloader = (function(){
     for (var i = 0; i < arguments.length; i++) 
     {
      var extendClass = arguments[i];
-     this.currentClass.addExtend(extendClass);
+     this.currentClass.addExtends(extendClass);
     } 
   };
 
@@ -289,8 +289,12 @@ var Classloader = (function(){
       else
         str += prototypestr + method.name + " = " + method.method + ";" + this.D_EOF;
     }
-    if(c.extends)  
-      str += "  " + c.getClassName() + ".Extends(" + c.extends +");" + this.D_EOF;
+    if(c.extends.length != 0)  
+    {
+      for (var i = 0; i < c.extends.length; i++)
+        str += "  " + c.getClassName() + ".Extends(" + c.extends[i] +");" + this.EOF;
+      str += this.EOF;
+    }
 
     for (var i = 0; i < c.resources.length; i++)
       str += "  " + c.getClassName() + "." + c.resources[i].type + " = \"" + c.resources[i].getContents() + "\";" + this.D_EOF;
