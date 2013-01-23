@@ -15,7 +15,7 @@ var Classloader = (function(){
   {
     this.version = "1.3";
 
-    if(sourcePath == undefined || package == undefined)
+    if (sourcePath == undefined || package == undefined)
       throw new Error("Classloader requires a source folder and package name");
 
     this.sourcePath = sourcePath;
@@ -28,9 +28,12 @@ var Classloader = (function(){
     this.EOF = "\n";
     this.D_EOF = "\n\n";
 
+    if (!FileSystem.existsSync(this.sourcePath))
+      throw new Error("Source path could not be opened");
+
     this.filelist = new Glob(sourcePath + "/" + this.package.replace(/\./g, "/"), ".js").getList();
 
-    if(this.filelist.length == 0)
+    if (this.filelist.length == 0)
       throw new Error("Found no files to compile");
 
     this.sourceCode = this.getSourceContent(this.filelist);
@@ -40,7 +43,7 @@ var Classloader = (function(){
 
   Classloader.prototype.Package = function (namespaceURI)
   {
-    if(namespaceURI == "")
+    if (namespaceURI == "")
       throw new Error("Package namespaceURI cannot be empty");
 
     // Create a class; a class always starts with a package, subsequent function calls will be applied to this class.
@@ -52,7 +55,7 @@ var Classloader = (function(){
     for (var i = 0; i < namespaces.length; i++) 
     {
       var ns = namespaces[i];
-      if(obj[ns] === undefined) 
+      if (obj[ns] === undefined) 
       {
         obj[ns] = {};
         obj = obj[ns];
@@ -115,19 +118,19 @@ var Classloader = (function(){
   Classloader.prototype.parseMethods = function (args) 
   {
 
-    if(typeof args[0] !== "function")
+    if (typeof args[0] !== "function")
       throw new Error("First argument of Class should be a function");
 
     // Parse the methods in the class
     for (var i = 0; i < args.length; i++) 
     {
       var arg = args[i];
-      if(typeof arg == "function")
+      if (typeof arg == "function")
       {
         var name = this.getMethodName(arg);
-        if(i == 0) // the first method is the constructor 
+        if (i == 0) // the first method is the constructor 
         {
-          if(name == "")
+          if (name == "")
             throw new Error("First method of a class should carry the Class name");
 
           this.currentClass.setConstructor(name, arg);
@@ -139,7 +142,7 @@ var Classloader = (function(){
         else
           this.currentClass.addMethod(name, arg);
       }
-      else if(typeof arg == "object")
+      else if (typeof arg == "object")
       {
         for(var name in arg)
           this.currentClass.setProperty(name, arg[name])
@@ -154,7 +157,7 @@ var Classloader = (function(){
   Classloader.prototype.getMethodName = function (f) {
     var str = f.toString();
     var name = str.substring(str.indexOf(' ')+1, str.indexOf("("));
-    if(name == '' || name == ' ')
+    if (name == '' || name == ' ')
       return false;
     else
       return name;
@@ -171,7 +174,7 @@ var Classloader = (function(){
       {
         var c = classes[namespaceURI];
 
-        if(c.hasUnresolvedDependencies(this.classes))
+        if (c.hasUnresolvedDependencies(this.classes))
           continue;
         else
         {
@@ -184,7 +187,7 @@ var Classloader = (function(){
       runs++;
       classes = this.getUnresolvedClasses();
     }
-    if(this.getUnresolvedClasses())
+    if (this.getUnresolvedClasses())
       throw new Error("Could not resolve all classes within 20 runs");
 
   };
@@ -193,9 +196,9 @@ var Classloader = (function(){
   {
     var classes = {};
     for(var namespaceURI in this.classes)
-      if(!this.classes[namespaceURI].isResolved())
+      if (!this.classes[namespaceURI].isResolved())
         classes[namespaceURI] = this.classes[namespaceURI];    
-    if(!this.classes[namespaceURI].isResolved())
+    if (!this.classes[namespaceURI].isResolved())
       classes[namespaceURI] = this.classes[namespaceURI];
     if (Object.keys(classes).length != 0) 
       return classes;
@@ -233,7 +236,7 @@ var Classloader = (function(){
   {
     return ["Function.prototype.Extends = function(base)", 
             "{", 
-            "  if(!base)", 
+            "  if (!base)", 
             "    debugger;", 
             "  for (var name in base.prototype)", 
             "  {", 
@@ -250,7 +253,7 @@ var Classloader = (function(){
     var str = "";
     for(var name in obj)
     {
-      if(isroot)
+      if (isroot)
         str += "var " + name +" = {" + this.writeNamespaces(obj[name])+ "}; ";
       else
         str += name +": {" + this.writeNamespaces(obj[name])+ "},";
@@ -270,7 +273,7 @@ var Classloader = (function(){
     for(var namespaceURI in c.dependencies)
       str += "  var " + this.classes[namespaceURI].getClassName() + " = " + namespaceURI + ";"+ this.EOF;
     
-    if(c.hasDependencies())
+    if (c.hasDependencies())
       str += this.EOF;
 
     str += "  var " + c.getClassName() + " = " + c.constr.method + this.D_EOF;
@@ -282,14 +285,14 @@ var Classloader = (function(){
     for (var i = 0; i < c.methods.length; i++) 
     {
       var method = c.methods[i];
-      if(!method.name) //anonymous functions
+      if (!method.name) //anonymous functions
         str += "  (" + method.method + ")();" + this.D_EOF;
-      else if(method.flag == this.Static) // static methods
+      else if (method.flag == this.Static) // static methods
         str += staticstr + method.name + " = " + method.method + ";" + this.D_EOF;
       else
         str += prototypestr + method.name + " = " + method.method + ";" + this.D_EOF;
     }
-    if(c.extends.length != 0)  
+    if (c.extends.length != 0)  
     {
       for (var i = 0; i < c.extends.length; i++)
         str += "  " + c.getClassName() + ".Extends(" + c.extends[i] +");" + this.EOF;
@@ -301,12 +304,12 @@ var Classloader = (function(){
 
     for(var name in c.getProperties())
       str += "  " + c.getClassName() + "." + name + " = " + c.getProperty(name) + ";" + this.EOF;
-    if(c.hasProperties())
+    if (c.hasProperties())
       str += this.EOF;
 
     str += "  if (!" + c.getClassName() + ".name) " + c.getClassName() + ".name = '" +c.getClassName()+ "';" + this.D_EOF;
 
-    if(c.singleton)
+    if (c.singleton)
       str += "  return new " + c.getClassName() + "();" + this.D_EOF + "})();" + this.D_EOF;
     else
       str += "  return " + c.getClassName() + ";" + this.D_EOF + "})();" + this.D_EOF;
