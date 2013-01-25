@@ -132,3 +132,4 @@ com.something.components.thing.Thing = (function() {
   - you could remove unnecessary whitespace
 - set up unit testing of a sort
   - you could even run this from NodeJS
+- does it matter if anonymous static methods (Which get executed straight away) are before the extends statement? 
