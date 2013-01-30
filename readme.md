@@ -133,3 +133,7 @@ com.something.components.thing.Thing = (function() {
 - set up unit testing of a sort
   - you could even run this from NodeJS
 - does it matter if anonymous static methods (Which get executed straight away) are before the extends statement? 
+- now you just go through the classes and write out the ones with no dependencies, and then the ones that depended on those, until you are done,
+ or until you've gone through twenty runs. This works, but only for now.
+  - It is possible to build a dependency tree
+  - Then create a Tree Walker that walks over the 'leafest' classes and from there walk up. You should look into this.
