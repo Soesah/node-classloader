@@ -128,6 +128,7 @@ com.something.components.thing.Thing = (function() {
 - implement crypting
   - crypting is accomplished by changing the names of objects and methods and properties to something shorter
   - this may means parsing methods in order to crypt them
+  - See http://code.google.com/p/pynarcissus/source/checkout
 - implement minifying (isn't that the same as crypting?)
   - you could remove unnecessary whitespace
 - set up unit testing of a sort
