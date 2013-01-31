@@ -107,6 +107,11 @@ var Class = (function(){
     return !this.isEmpty(this.dependencies);
   };
 
+  Class.prototype.getDependencies = function()
+  {
+    return this.dependencies;
+  };
+
   Class.prototype.isEmpty = function(obj) 
   {
     if(Object.keys(obj).length == 0)
