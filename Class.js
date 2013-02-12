@@ -41,7 +41,11 @@ var Class = (function(){
 
   Class.prototype.getProperty = function(name)
   {
-    return this.properties[name];
+    var propValue = this.properties[name];
+    if (typeof propValue == "string")
+      return "\"" + propValue + "\"";
+    else
+      return propValue;
   }
 
   Class.prototype.getProperties = function()
