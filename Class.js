@@ -42,10 +42,54 @@ var Class = (function(){
   Class.prototype.getProperty = function(name)
   {
     var propValue = this.properties[name];
-    if (typeof propValue == "string")
-      return "\"" + propValue + "\"";
+    return this.writeValue(propValue);
+  }
+
+  Class.prototype.writeValue = function(value)
+  {
+    if (typeof value == "string") // escape strings
+      return "\"" + value + "\"";
+    else if (typeof value == "object" && !this.isArray(value) && !this.isRegExp(value)) // regular expressions type as objects
+      return this.writeObject(value);
+    else if (this.isArray(value))
+      return this.writeArray(value);
     else
-      return propValue;
+      return value; // anything else for now, just output it.
+  }
+  
+  Class.prototype.writeArray = function (value) 
+  {
+    var str = "[";
+
+    var parts = [];
+    for (var name in value)
+      parts.push(this.writeValue(value[name]));
+
+    str += parts.join(",") +"]";
+    return str;
+  }
+
+  Class.prototype.writeObject = function (value) 
+  {
+    var str = "\n  {";
+
+    var parts = [];
+    for (var name in value)
+      parts.push("\n    " + name + ":" + this.writeValue(value[name]));
+
+
+    str += parts.join(",") +"\n  }";
+    return str;
+  }
+
+  Class.prototype.isArray = function (obj) 
+  {
+    return Object.prototype.toString.call(obj).indexOf("Array") != -1;
+  }
+
+  Class.prototype.isRegExp = function (obj) 
+  {
+    return Object.prototype.toString.call(obj).indexOf("RegExp") != -1;
   }
 
   Class.prototype.getProperties = function()

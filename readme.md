@@ -120,8 +120,6 @@ com.something.components.thing.Thing = (function() {
 </pre>
 
 ## Todo
-- static properties
-  - can now be numbers and strings, but not objects... objectWriter
 - parse comments out of the source
   - this requires parsing the code as a string. 
   - Comments outside of methods are already parsed out, comments inside functions are not
