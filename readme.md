@@ -138,3 +138,5 @@ com.something.components.thing.Thing = (function() {
  or until you've gone through twenty runs. This works, but only for now.
   - It is possible to build a dependency tree
   - Then create a Tree Walker that walks over the 'leafest' classes and from there walk up. You should look into this.
+- What if you added the dependencies to the classes themselves, and walked through the core class down into its leafest class, and then back up.?
+

@@ -10,16 +10,23 @@ var Classloader = (function(){
   var Glob = require('./Glob.js');
   var FileSystem = require('fs');
   var ClassObject = require("./Class.js");
-  
+
   var Classloader = function Classloader(sourcePath, package)
   {
-    this.version = "1.3";
+    this.version = "1.4";
 
     if (sourcePath == undefined || package == undefined)
       throw new Error("Classloader requires a source folder and package name");
 
+    if (!FileSystem.existsSync(sourcePath))
+      throw new Error("Source path could not be opened");
+
+    if (!FileSystem.existsSync(sourcePath + "/" + package.replace(/\./g, "/") + ".js"))
+      throw new Error("Package name is not a fully qualified package");
+
     this.sourcePath = sourcePath;
     this.package = package;
+    this.packageRoot = this.package.substring(0, this.package.indexOf("."))
     this.classes = {};
     this.classOrder = [];
     this.namespaces = {};
@@ -28,10 +35,7 @@ var Classloader = (function(){
     this.EOF = "\n";
     this.D_EOF = "\n\n";
 
-    if (!FileSystem.existsSync(this.sourcePath))
-      throw new Error("Source path could not be opened");
-
-    this.filelist = new Glob(sourcePath + "/" + this.package.replace(/\./g, "/"), ".js").getList();
+    this.filelist = new Glob(this.sourcePath + "/" + this.packageRoot, ".js").getList();
 
     if (this.filelist.length == 0)
       throw new Error("Found no files to compile");
