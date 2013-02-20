@@ -20,15 +20,20 @@ Class Classloader
   }
 }
 
-$path = "source";
-$package = (isset($_GET["package"]))?$_GET["package"]:"com";
-
 header("Content-type:application/x-javascript ; charset=utf-8");
 header("Content-type: text/javascript");
 
 header("Content-Encoding: gzip");
 ob_start('ob_gzhandler') ;
 
+$path = "source";
+$package = str_replace('_', '.', key($_GET));
+
+if ($package == "")
+{
+  echo "console.error('Classloader Error: no package found');";
+  die();
+}
 new Classloader($path, $package);
 
 ?>
