@@ -145,9 +145,9 @@ var Class = (function(){
     this.resources.push(new Resource(type, path));
   };
 
-  Class.prototype.addDependency = function(className) 
+  Class.prototype.addDependency = function(className, classObject) 
   {
-    this.dependencies[className] = true;
+    this.dependencies[className] = (classObject)?classObject:true;
   };
 
   Class.prototype.hasDependencies = function()
@@ -160,6 +160,15 @@ var Class = (function(){
     return this.dependencies;
   };
 
+  Class.prototype.getUnresolvedDependencies = function()
+  {
+    var obj = {};
+    for (var namespaceURI in this.dependencies)
+      if (!this.dependencies[namespaceURI].isResolved())
+        obj[namespaceURI] = this.dependencies[namespaceURI];
+    return obj;
+  };
+
   Class.prototype.isEmpty = function(obj) 
   {
     if(Object.keys(obj).length == 0)
@@ -167,21 +176,6 @@ var Class = (function(){
     else
       return false;
   };
-
-  Class.prototype.hasUnresolvedDependencies = function(classes)
-  {
-    for(var namespaceURI in this.dependencies)
-    {
-      if(classes[namespaceURI])
-      {
-        if(!classes[namespaceURI].isResolved())
-          return true;
-      }
-      else
-        throw new Error(this.name + " could not resolve a dependency on namespace '" + namespaceURI + "'");        
-    } 
-    return false;
-  }
 
   Class.prototype.setResolved = function() 
   {

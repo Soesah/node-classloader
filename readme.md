@@ -1,14 +1,14 @@
 # Node ClassLoader
 
-This is a Javascript classloader that converts easy to read (and valid) Javascript in functioning and executable Javascript.
+This is a JavaScript classloader that converts easy-to-read (and valid) JavaScript with a Class structure in functioning and executable JavaScript.
 
-The classloader uses a php script to output the compiled code as Javascript to the browser. I didn't feel like using a NodeJS server for that. The php calls does a command line call to NodeJS to run the Classloader.
+The classloader can be used through a php script to output the compiled code as JavaScript to the browser. The php does a command line call to NodeJS to run the Classloader with the proper arguments. 
 
-The Classloader parses the original Javascript. Resolves dependencies and finally writes the output. The Classloader compiles classes that follow the format below. 
+The Classloader parses the original JavaScript, resolves dependencies and finally writes the output. The Classloader compiles classes that follow the format below. 
 
 ## Configuration
 
-<code>classloader.php</code> contains two variables, path and package. Path is configured in classloader and refers to the source directory that the Classloader will scan for classes. The default for this is '<i>source</i>' Package refers to a the package name. You can load smaller packages from the source. The default is '<i>com</i>'.
+<code>classloader.php</code> contains two variables, path and package. Path is configured in classloader and refers to the source directory that the Classloader will scan for classes. The default for this is '<i>source</i>' Package refers to the package name. You can load smaller packages from the source. 
 
 Below you can find how to write a class, and what the Classloader does with it.
 
@@ -134,9 +134,3 @@ com.something.components.thing.Thing = (function() {
 - set up unit testing of a sort
   - you could even run this from NodeJS
 - does it matter if anonymous static methods (Which get executed straight away) are before the extends statement? 
-- now you just go through the classes and write out the ones with no dependencies, and then the ones that depended on those, until you are done,
- or until you've gone through twenty runs. This works, but only for now.
-  - It is possible to build a dependency tree
-  - Then create a Tree Walker that walks over the 'leafest' classes and from there walk up. You should look into this.
-- What if you added the dependencies to the classes themselves, and walked through the core class down into its leafest class, and then back up.?
-

@@ -13,7 +13,7 @@ var Classloader = (function(){
 
   var Classloader = function Classloader(sourcePath, package)
   {
-    this.version = "1.4";
+    this.version = "1.42";
 
     if (sourcePath == undefined || package == undefined)
       throw new Error("Classloader requires a source folder and package name");
@@ -26,7 +26,9 @@ var Classloader = (function(){
 
     this.sourcePath = sourcePath;
     this.package = package;
-    this.packageRoot = this.package.substring(0, this.package.indexOf("."))
+    this.packageRoot = this.package.substring(0, this.package.indexOf(".")); // get the root of the package we are loading
+    this.object = this.package.substring(this.package.lastIndexOf(".") + 1); // get the name of the object
+
     this.classes = {};
     this.classOrder = [];
     this.namespaces = {};
@@ -52,21 +54,6 @@ var Classloader = (function(){
 
     // Create a class; a class always starts with a package, subsequent function calls will be applied to this class.
     this.currentClass = new ClassObject(namespaceURI);
-
-    var namespaces = namespaceURI.split(".");
-    var obj = this.namespaces;
-
-    for (var i = 0; i < namespaces.length; i++) 
-    {
-      var ns = namespaces[i];
-      if (obj[ns] === undefined) 
-      {
-        obj[ns] = {};
-        obj = obj[ns];
-      }
-      else
-        obj = obj[ns];
-    }
   };
 
   Classloader.prototype.Import = function ()
@@ -169,32 +156,36 @@ var Classloader = (function(){
 
   Classloader.prototype.resolveDependencies = function () 
   {
-    var classes = this.getUnresolvedClasses();
-    var runs = 0;
-    var maxruns = 20;
-    while(classes != 0 && maxruns >= runs)
+    // update dependencies and parents
+    for (var namespaceURI in this.classes)
     {
-      for (var namespaceURI in classes) 
+      var classObject = this.classes[namespaceURI];
+      var dependencies = classObject.getDependencies();
+      
+      for (var dependency in dependencies)
       {
-        var c = classes[namespaceURI];
-
-        if (c.hasUnresolvedDependencies(this.classes))
-          continue;
-        else
-        {
-          c.setResolved();
-          // add the classname to an ordered list of classes to render
-          this.classOrder.push(c.getName());
-        }
+        var dependencyObject = this.classes[dependency];
+        // update the dependency with the full class object
+        classObject.addDependency(dependency, dependencyObject);
       }
-
-      runs++;
-      classes = this.getUnresolvedClasses();
     }
-    if (this.getUnresolvedClasses())
-      throw new Error("Could not resolve all classes within 20 runs");
 
+    this.resolveOrder(this.package);
   };
+
+  Classloader.prototype.resolveOrder = function (namespaceURI)
+  {
+    var classObject = this.classes[namespaceURI];
+
+    for (var dependencyURI in classObject.getUnresolvedDependencies())
+      this.resolveOrder(dependencyURI);
+
+    if (!classObject.isResolved())
+    {
+      this.classOrder.push(classObject);
+      classObject.setResolved();
+    }
+  }
 
   Classloader.prototype.getUnresolvedClasses = function ()
   {
@@ -202,12 +193,34 @@ var Classloader = (function(){
     for(var namespaceURI in this.classes)
       if (!this.classes[namespaceURI].isResolved())
         classes[namespaceURI] = this.classes[namespaceURI];    
-    if (!this.classes[namespaceURI].isResolved())
-      classes[namespaceURI] = this.classes[namespaceURI];
     if (Object.keys(classes).length != 0) 
       return classes;
     else
       return false;
+  };
+
+  Classloader.prototype.gatherNamespaces = function()
+  {
+    for (var namespaceURI in this.classes)
+    {
+      if (this.classes[namespaceURI].isResolved())
+      {
+        var namespaces = namespaceURI.split(".");
+        var obj = this.namespaces;
+
+        for (var i = 0; i < namespaces.length -1; i++) 
+        {
+          var ns = namespaces[i];
+          if (obj[ns] === undefined) 
+          {
+            obj[ns] = {};
+            obj = obj[ns];
+          }
+          else
+            obj = obj[ns];
+        }
+      }
+    }
   };
 
   Classloader.prototype.getSourceContent = function(filelist)
@@ -223,17 +236,19 @@ var Classloader = (function(){
     eval(this.sourceCode);
 
     this.resolveDependencies();
+
+    this.gatherNamespaces();
   };
 
   Classloader.prototype.writeOutput = function() 
   {    
-    process.stdout.write("\"use strict\";");
-    process.stdout.write("// Node Classloader Version " + this.version + this.D_EOF);
+    process.stdout.write("\"use strict\";\n");
+    process.stdout.write("// " + this.object + " - Node Classloader Version " + this.version + this.D_EOF);
     process.stdout.write(this.writeExtendsFunction() + this.D_EOF);
     process.stdout.write(this.writeNamespaces(this.namespaces, true) + this.D_EOF);
 
     for (var i = 0; i < this.classOrder.length; i++) 
-      process.stdout.write(this.writeClassDefinition(this.classes[this.classOrder[i]]));
+      process.stdout.write(this.writeClassDefinition(this.classOrder[i]));
   };
 
   Classloader.prototype.writeExtendsFunction = function()
@@ -317,29 +332,36 @@ var Classloader = (function(){
       str += "  return new " + c.getClassName() + "();" + this.D_EOF + "})();" + this.D_EOF;
     else
       str += "  return " + c.getClassName() + ";" + this.D_EOF + "})();" + this.D_EOF;
+
     return str;
   };
 
   return Classloader;
 })();
 
+try
+{
+  var classloader = new Classloader(sourcePath, package);
 
-var classloader = new Classloader(sourcePath, package);
+  // globally register functions called in source , and route them to the Classloader
+  Package     = function () { classloader.Package.apply(classloader, arguments)};
+  Extends     = function () { classloader.Extends.apply(classloader, arguments)};
+  Import      = function () { classloader.Import.apply(classloader, arguments)};
+  Class       = function () { classloader.Class.apply(classloader, arguments)};
+  Singleton   = function () { classloader.Singleton.apply(classloader, arguments)};
+  XMLResource = function () { classloader.XMLResource.apply(classloader, arguments)};
+  CSSResource = function () { classloader.CSSResource.apply(classloader, arguments)};
 
-// globally register functions called in source , and route them to the Classloader
-Package     = function () { classloader.Package.apply(classloader, arguments)};
-Extends     = function () { classloader.Extends.apply(classloader, arguments)};
-Import      = function () { classloader.Import.apply(classloader, arguments)};
-Class       = function () { classloader.Class.apply(classloader, arguments)};
-Singleton   = function () { classloader.Singleton.apply(classloader, arguments)};
-XMLResource = function () { classloader.XMLResource.apply(classloader, arguments)};
-CSSResource = function () { classloader.CSSResource.apply(classloader, arguments)};
+  // flags
+  Abstract    = classloader.Abstract;
+  Static      = classloader.Static;
+  Public      = classloader.Public;
+  Protected   = classloader.Protected;
 
-// flags
-Abstract    = classloader.Abstract;
-Static      = classloader.Static;
-Public      = classloader.Public;
-Protected   = classloader.Protected;
-
-classloader.compile();
-classloader.writeOutput();
+  classloader.compile();
+  classloader.writeOutput();
+}
+catch (e)
+{
+  process.stdout.write("console.error('Classloader " +e.stack.replace(/\n/g,'\\n')+"');");
+}
