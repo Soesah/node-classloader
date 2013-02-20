@@ -165,6 +165,10 @@ var Classloader = (function(){
       for (var dependency in dependencies)
       {
         var dependencyObject = this.classes[dependency];
+
+        if (dependencyObject == undefined)
+          throw new Error("Class '"+namespaceURI+"' could not resolve dependency on '"+dependency+"'")
+
         // update the dependency with the full class object
         classObject.addDependency(dependency, dependencyObject);
       }
@@ -191,8 +195,10 @@ var Classloader = (function(){
   {
     var classes = {};
     for(var namespaceURI in this.classes)
+    {
       if (!this.classes[namespaceURI].isResolved())
         classes[namespaceURI] = this.classes[namespaceURI];    
+    }
     if (Object.keys(classes).length != 0) 
       return classes;
     else
@@ -363,5 +369,5 @@ try
 }
 catch (e)
 {
-  process.stdout.write("console.error('Classloader " +e.stack.replace(/\n/g,'\\n')+"');");
+  process.stdout.write("console.error(\"Classloader " +e.stack.replace(/\n/g,'\\n')+"\");");
 }
