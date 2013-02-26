@@ -259,7 +259,8 @@ var Classloader = (function(){
 
   Classloader.prototype.writeExtendsFunction = function()
   {
-    return ["Function.prototype.Extends = function(base)", 
+    return ["// Add the extends method to function",
+            "Function.prototype.extends = function extends(base)", 
             "{", 
             "  if (!base)", 
             "    debugger;", 
@@ -320,7 +321,7 @@ var Classloader = (function(){
     if (c.extends.length != 0)  
     {
       for (var i = 0; i < c.extends.length; i++)
-        str += "  " + c.getClassName() + ".Extends(" + c.extends[i] +");" + this.EOF;
+        str += "  " + c.getClassName() + ".extends(" + c.extends[i] +");" + this.EOF;
       str += this.EOF;
     }
 
