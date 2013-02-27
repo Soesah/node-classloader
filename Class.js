@@ -13,7 +13,6 @@ var Class = (function(){
 
     this.resources = [];
     this.dependencies = {};
-    this.dependencyCount = 0;
     this.imports = [];
     this.extends = [];
     this.methods = [];
@@ -149,8 +148,6 @@ var Class = (function(){
   Class.prototype.addDependency = function(className, classObject) 
   {
     this.dependencies[className] = (classObject)?classObject:true;
-    if (classObject)
-      this.dependencyCount += 1;
   };
 
   Class.prototype.hasDependencies = function()
@@ -161,11 +158,6 @@ var Class = (function(){
   Class.prototype.getDependencies = function()
   {
     return this.dependencies;
-  };
-
-  Class.prototype.getDependencyCount = function()
-  {
-    return this.dependencyCount;
   };
 
   Class.prototype.getUnresolvedDependencies = function()
