@@ -20,8 +20,7 @@ Class Classloader
   }
 }
 
-header("Content-type:application/x-javascript ; charset=utf-8");
-header("Content-type: text/javascript");
+header("Content-type: text/javascript; charset=utf-8");
 
 header("Content-Encoding: gzip");
 ob_start('ob_gzhandler') ;
