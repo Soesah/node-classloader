@@ -259,8 +259,8 @@ var Classloader = (function(){
 
   Classloader.prototype.writeExtendsFunction = function()
   {
-    return ["// Add the extends method to function",
-            "Function.prototype.extends = function (base)", 
+    return ["// Add the extend method to function",
+            "Function.prototype.extend = function (base)", 
             "{", 
             "  if (!base)", 
             "    debugger;", 
@@ -296,13 +296,16 @@ var Classloader = (function(){
     str += c.getName() + " = (function()" + this.EOF;
     str += "{" + this.D_EOF;
 
+    var dependencyCount = 1;
     for(var namespaceURI in c.dependencies)
-      str += "  var " + this.classes[namespaceURI].getClassName() + " = " + namespaceURI + ";"+ this.EOF;
-    
-    if (c.hasDependencies())
-      str += this.EOF;
+    {
+      var pre = (dependencyCount === 1)?"  var ":"      ";
+      str += pre + this.classes[namespaceURI].getClassName() + " = " + namespaceURI + "," + this.EOF;
+      dependencyCount += 1;
+    } 
 
-    str += "  var " + c.getClassName() + " = " + c.constr.method + this.D_EOF;
+    var pre = (!c.hasDependencies())?"  var ":"      ";
+    str += pre + c.getClassName() + " = " + c.constr.method + this.D_EOF;
 
     var prototypestr = "  " + c.getClassName() + ".prototype.";
     var staticstr = "  " + c.getClassName() + ".";
@@ -321,7 +324,7 @@ var Classloader = (function(){
     if (c.extends.length != 0)  
     {
       for (var i = 0; i < c.extends.length; i++)
-        str += "  " + c.getClassName() + ".extends(" + c.extends[i] +");" + this.EOF;
+        str += "  " + c.getClassName() + ".extend(" + c.extends[i] +");" + this.EOF;
       str += this.EOF;
     }
 
