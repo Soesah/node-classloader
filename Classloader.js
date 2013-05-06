@@ -296,13 +296,16 @@ var Classloader = (function(){
     str += c.getName() + " = (function()" + this.EOF;
     str += "{" + this.D_EOF;
 
+    var dependencyCount = 1;
     for(var namespaceURI in c.dependencies)
-      str += "  var " + this.classes[namespaceURI].getClassName() + " = " + namespaceURI + ";"+ this.EOF;
-    
-    if (c.hasDependencies())
-      str += this.EOF;
+    {
+      var pre = (dependencyCount === 1)?"  var ":"      ";
+      str += pre + this.classes[namespaceURI].getClassName() + " = " + namespaceURI + "," + this.EOF;
+      dependencyCount += 1;
+    } 
 
-    str += "  var " + c.getClassName() + " = " + c.constr.method + this.D_EOF;
+    var pre = (!c.hasDependencies())?"  var ":"      ";
+    str += pre + c.getClassName() + " = " + c.constr.method + this.D_EOF;
 
     var prototypestr = "  " + c.getClassName() + ".prototype.";
     var staticstr = "  " + c.getClassName() + ".";
