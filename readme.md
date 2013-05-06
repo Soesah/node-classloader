@@ -119,6 +119,10 @@ com.something.components.thing.Thing = (function() {
 })(); 
 </pre>
 
+## Notes
+
+Complex code causes Google Closure Compiler to not understand anymore, causing faulty code.
+
 ## Todo
 - parse comments out of the source
   - this requires parsing the code as a string. 
