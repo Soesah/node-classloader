@@ -2,13 +2,13 @@
 
 This is a JavaScript classloader that converts easy-to-read (and valid) JavaScript with a Class structure in functioning and executable JavaScript.
 
-The classloader can be used through a php script to output the compiled code as JavaScript to the browser. The php does a command line call to NodeJS to run the Classloader with the proper arguments. 
+The classloader can be used through a python script to output the compiled code as JavaScript to the browser. The python does a command line call to NodeJS to run the Classloader with the proper arguments. 
 
 The Classloader parses the original JavaScript, resolves dependencies and finally writes the output. The Classloader compiles classes that follow the format below. 
 
 ## Configuration
 
-<code>classloader.php</code> contains two variables, path and package. Path is configured in classloader and refers to the source directory that the Classloader will scan for classes. The default for this is '<i>source</i>' Package refers to the package name. You can load smaller packages from the source. 
+<code>Classloader.py</code> contains three variables, path, package, and classloaderpath. Path is configured in classloader and refers to the source directory that the Classloader will scan for classes. The default for this is '<i>source</i>' Package refers to the package name. You can load smaller packages from the source. The classloaderpath is used to specify where node should load Classloader.js.
 
 Below you can find how to write a class, and what the Classloader does with it.
 
