@@ -9,6 +9,12 @@ class Classloader():
     if package == None:
       raise Exception("Classloader Error: no package found")
 
+    if not os.path.exists(path):
+      raise Exception("Classloader Error: path does not exist")
+
+    if not os.path.isfile(classloaderpath + "Classloader.js"):
+      raise Exception("Classloader Error: Classloader.js could not be found")
+
     self.path = path
     self.package = package
     self.classloaderpath = classloaderpath
