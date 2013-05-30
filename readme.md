@@ -2,7 +2,7 @@
 
 This is a JavaScript classloader that converts easy-to-read (and valid) JavaScript with a Class structure in functioning and executable JavaScript.
 
-The classloader can be used through a php script to output the compiled code as JavaScript to the browser. The php does a command line call to NodeJS to run the Classloader with the proper arguments. 
+The classloader can be used through a php script to output the compiled code as JavaScript to the browser. The php does a command line call to NodeJS to run the Classloader with the proper arguments. You could just as well use a node server directly or use a different language to be the intermediary.
 
 The Classloader parses the original JavaScript, resolves dependencies and finally writes the output. The Classloader compiles classes that follow the format below. 
 
