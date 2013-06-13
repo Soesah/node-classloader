@@ -239,7 +239,15 @@ var Classloader = (function(){
 
   Classloader.prototype.compile = function ()  
   {
-    eval(this.sourceCode);
+    try
+    {
+      eval(this.sourceCode);
+    }
+    catch(e)
+    {
+      process.stdout.write(this.sourceCode);
+      return;
+    }
 
     this.resolveDependencies();
 
