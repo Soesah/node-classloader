@@ -13,7 +13,8 @@ var Classloader = (function(){
 
   var Classloader = function Classloader(sourcePath, package)
   {
-    this.version = "1.42";
+    this.version = "1.43";
+    this.debug = false;
 
     if (sourcePath == undefined || package == undefined)
       throw new Error("Classloader requires a source folder and package name");
@@ -233,9 +234,18 @@ var Classloader = (function(){
   {
     var sources = filelist.map(function(file){
             return FileSystem.readFileSync(file, this.encoding);
-          });
-    return sources.join(this.EOF);
+          }),
+        code = sources.join(this.EOF);
+
+    if (this.debug)
+      code = this.removeComments(code);
+    return code;
   };
+
+  Classloader.prototype.removeComments = function (code)
+  {
+    return code.replace(/((\s|$)\/\/.*)/g, "");
+  },
 
   Classloader.prototype.compile = function ()  
   {
@@ -267,16 +277,15 @@ var Classloader = (function(){
 
   Classloader.prototype.writeExtendsFunction = function()
   {
-    return ["// Add the extend method to function",
-            "Function.prototype.extend = function (base)", 
+    return ["Function.prototype.extend = function (base)", 
             "{", 
             "  if (!base)", 
             "    debugger;", 
             "  for (var name in base.prototype)", 
             "  {", 
-            "    if (this.prototype[name]) //if the method exists, declare it as a super method" +this.EOF + 
+            "    if (this.prototype[name]) "+ ((this.debug)?"//if the method exists, declare it as a super method":"") +this.EOF + 
             "      this.prototype[base.name + \"$\" + name] = base.prototype[name];" +this.EOF + 
-            "    else //if the method does not exist, declare it as regular", 
+            "    else" + ((this.debug)?"//if the method does not exist, declare it as regular":""), 
             "      this.prototype[name] = base.prototype[name];", 
             "  }", 
             "} "].join(this.EOF) ;
@@ -299,7 +308,8 @@ var Classloader = (function(){
   Classloader.prototype.writeClassDefinition = function(c)
   {
     var str = "";
-    str += "// " + c.getName() + this.EOF;
+    if (this.debug)
+      str += "// " + c.getName() + this.EOF;
     str += "if (typeof " + c.getName() + " == 'undefined')" + this.EOF;
     str += c.getName() + " = (function()" + this.EOF;
     str += "{" + this.D_EOF;
