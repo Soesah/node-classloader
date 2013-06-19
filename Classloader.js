@@ -391,5 +391,6 @@ try
 }
 catch (e)
 {
-  process.stdout.write("console.error(\"Classloader " +e.stack.replace(/\n/g,'\\n')+"\");");
+  var message = (e.stack != undefined)?e.stack.replace(/\n/g,'\\n'):e.message;
+  process.stdout.write("console.error(\"Classloader " + message + "\");");
 }
