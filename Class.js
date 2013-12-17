@@ -48,7 +48,7 @@ var Class = (function(){
   Class.prototype.writeValue = function(value)
   {
     if (typeof value == "string") // escape strings
-      return "\"" + value + "\"";
+      return "\"" + value.replace(/"/g, "\\\"") + "\"";
     else if (typeof value == "object" && !this.isArray(value) && !this.isRegExp(value)) // regular expressions type as objects
       return this.writeObject(value);
     else if (this.isArray(value))
