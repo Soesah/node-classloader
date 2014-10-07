@@ -350,7 +350,7 @@ var Classloader = (function(){
       str += "  " + c.getClassName() + "." + c.resources[i].type + " = \"" + c.resources[i].getContents() + "\";" + this.D_EOF;
 
     for(var name in c.getProperties())
-      str += "  " + c.getClassName() + "." + name + " = " + c.getProperty(name) + ";" + this.EOF;
+      str += "  " + c.getClassName() + ".prototype." + name + " = " + c.getProperty(name) + ";" + this.EOF;
     if (c.hasProperties())
       str += this.EOF;
 
