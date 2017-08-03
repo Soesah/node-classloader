@@ -10,6 +10,7 @@ var Classloader = (function(){
   var Glob = require('./Glob.js');
   var FileSystem = require('fs');
   var ClassObject = require("./Class.js");
+  var config = require("./config.js");
 
   var Classloader = function Classloader(sourcePath, package)
   {
@@ -49,6 +50,7 @@ var Classloader = (function(){
       throw new Error("Found no files to compile");
     }
 
+    this.parseShims();
     this.getClasses();
     this.compile();
     this.writeOutput();
@@ -72,6 +74,20 @@ var Classloader = (function(){
         _this.classes[name] = c  ;
     });
 
+  };
+
+  Classloader.prototype.parseShims = function () {
+    var _this = this;
+
+    config.shims.forEach(function(shim) {
+      _this.classes[shim.name] = {
+        source: shim.source,
+        isResolved: function() {return true;},
+        getDependencies: function() {return [];},
+        getUnresolvedDependencies: function() {return [];},
+        output: function() {return ''}
+      }
+    });
   };
 
   Classloader.prototype.resolveDependencies = function () 
