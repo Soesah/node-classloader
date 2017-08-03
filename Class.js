@@ -4,22 +4,15 @@
 
 var Class = (function(){
   
-  var Resource = require("./Resource.js");
-
-  var Class = function Class(namespaceURI)
+  var Class = function Class(name, source)
   { 
-    this.name;
-    this.namespaceURI = namespaceURI;
-
-    this.resources = [];
+    this.name = name;
+    this.source = (source + '');
+    this.lines = [];
     this.dependencies = {};
-    this.imports = [];
-    this.extends = [];
-    this.methods = [];
-    this.properties = {};
-
-    this.flag = null;
     this.resolved = false;
+
+    this.parseLines();
   } 
 
   Class.prototype.Class = Class;
@@ -29,125 +22,30 @@ var Class = (function(){
     return this.name;
   };
 
-  Class.prototype.getName = function()
+  Class.prototype.parseLines = function()
   {
-    return this.namespaceURI + "." +  this.name;
+    var _this = this,
+        source = this.source.split('\n');
+
+    // filter empty lines and imports
+    this.lines = source.filter(function(line, index) {
+      if (line.substring(0, 6) === 'import') {
+        _this.addDependency(line);
+        return false;
+      }
+      return line !== '';
+    });
   };
 
-  Class.prototype.setProperty = function(name, value)
+  Class.prototype.addDependency = function(line) 
   {
-    this.properties[name] = value;
-  }
-
-  Class.prototype.getProperty = function(name)
-  {
-    var propValue = this.properties[name];
-    return this.writeValue(propValue);
-  }
-
-  Class.prototype.writeValue = function(value)
-  {
-    if (typeof value == "string") // escape strings
-      return "\"" + value.replace(/"/g, "\\\"") + "\"";
-    else if (typeof value == "object" && !this.isArray(value) && !this.isRegExp(value)) // regular expressions type as objects
-      return this.writeObject(value);
-    else if (this.isArray(value))
-      return this.writeArray(value);
-    else
-      return value; // anything else for now, just output it.
-  }
-  
-  Class.prototype.writeArray = function (value) 
-  {
-    var str = "[";
-
-    var parts = [];
-    for (var name in value)
-      parts.push(this.writeValue(value[name]));
-
-    str += parts.join(",") +"]";
-    return str;
-  }
-
-  Class.prototype.writeObject = function (value) 
-  {
-    var str = "\n  {";
-
-    var parts = [];
-    for (var name in value)
-      parts.push("\n    " + name + ":" + this.writeValue(value[name]));
-
-
-    str += parts.join(",") +"\n  }";
-    return str;
-  }
-
-  Class.prototype.isArray = function (obj) 
-  {
-    return Object.prototype.toString.call(obj).indexOf("Array") != -1;
-  }
-
-  Class.prototype.isRegExp = function (obj) 
-  {
-    return Object.prototype.toString.call(obj).indexOf("RegExp") != -1;
-  }
-
-  Class.prototype.getProperties = function()
-  {
-    return this.properties;
-  }
-
-  Class.prototype.hasProperties = function()
-  {
-    return !this.isEmpty(this.properties);
-  }
-
-  Class.prototype.setSingleton = function() 
-  {
-    this.singleton = true;
+    var stripped = line.substring(7), // strip 'Import'
+        dependency = stripped.substring(0, stripped.indexOf('from') - 1);
+    this.dependencies[dependency] = true;
   };
 
-  Class.prototype.setFlag = function(flag) 
-  {
-    this.flag = flag;
-  };
-
-  Class.prototype.setConstructor = function(name, f) 
-  {
-    this.name = name;
-    this.constr = {name: name, method: f};
-  };
-
-  Class.prototype.addMethod = function(name, f) 
-  {
-    var method = {name: name, method: f};
-    if(this.flag)
-      method.flag = this.flag;
-    this.methods.push(method);
-    this.setFlag(null);
-  };
-
-  Class.prototype.addImport = function(className) 
-  {
-    this.imports.push(className);
-    this.addDependency(className);
-  };
-
-  Class.prototype.addExtends = function(className) 
-  {
-    this.extends.push(className);
-    this.addDependency(className);
-  };
-
-  Class.prototype.addResource = function(type, sourcePath, file) 
-  {
-    var path = sourcePath + "/" + this.namespaceURI.replace(/\./g,'/') + "/"+ file;
-    this.resources.push(new Resource(type, path));
-  };
-
-  Class.prototype.addDependency = function(className, classObject) 
-  {
-    this.dependencies[className] = (classObject)?classObject:true;
+  Class.prototype.updateDependency = function(name, obj) {
+    this.dependencies[name] = obj;
   };
 
   Class.prototype.hasDependencies = function()
@@ -163,19 +61,23 @@ var Class = (function(){
   Class.prototype.getUnresolvedDependencies = function()
   {
     var obj = {};
-    for (var namespaceURI in this.dependencies)
-      if (!this.dependencies[namespaceURI].isResolved())
-        obj[namespaceURI] = this.dependencies[namespaceURI];
+    for (var name in this.dependencies)
+      if (!this.dependencies[name].isResolved())
+        obj[name] = this.dependencies[name];
     return obj;
   };
 
-  Class.prototype.isEmpty = function(obj) 
+  Class.prototype.removeComments = function (code)
   {
-    if(Object.keys(obj).length == 0)
-      return true;
-    else
-      return false;
+    this.lines = this.lines.map(function(line) {
+      return line.replace(/((\s|$)\/\/.*)/g, "");
+    });    
   };
+
+  Class.prototype.output = function() {
+    return this.lines.join('\n')
+  };
+
 
   Class.prototype.setResolved = function() 
   {
