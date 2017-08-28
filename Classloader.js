@@ -90,7 +90,7 @@ var Classloader = (function(){
     });
   };
 
-  Classloader.prototype.resolveDependencies = function () 
+  Classloader.prototype.compile = function () 
   {
     // update dependencies and parents
     for (var name in this.classes)
@@ -137,22 +137,6 @@ var Classloader = (function(){
       return classes;
     } else {
       return false;
-    }
-  };
-
-  Classloader.prototype.compile = function ()  
-  {
-    this.resolveDependencies();
-
-    return;
-    try
-    {
-      eval(this.sourceCode);
-    }
-    catch(e)
-    {
-      process.stdout.write(this.sourceCode);
-      return;
     }
   };
 
