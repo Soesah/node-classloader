@@ -161,8 +161,13 @@ var Classloader = (function(){
     process.stdout.write("\"use strict\";\n");
     process.stdout.write("// " + this.package + " - Node Classloader Version " + this.version + this.D_EOF);
 
-    for (var i = 0; i < this.ordered_classes.length; i++) 
-      process.stdout.write(this.ordered_classes[i].output() + '\n');
+
+    process.stdout.write("new class {\n");
+    process.stdout.write("constructor() {\n");
+      for (var i = 0; i < this.ordered_classes.length; i++) {
+        process.stdout.write(this.ordered_classes[i].output() + '\n');
+      }
+    process.stdout.write("}\n};\n");
   };
 
   return Classloader;
