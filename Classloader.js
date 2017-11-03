@@ -12,8 +12,7 @@ var Classloader = (function(){
   var ClassObject = require("./Class.js");
   var config = require("./config.js");
 
-  var Classloader = function Classloader(sourcePath, package)
-  {
+  var Classloader = function Classloader(sourcePath, package) {
     this.version = "1.44";
     this.debug = false;
 
@@ -50,7 +49,6 @@ var Classloader = (function(){
       throw new Error("Found no files to compile");
     }
 
-    this.parseShims();
     this.getClasses();
     this.compile();
     this.writeOutput();
@@ -59,12 +57,11 @@ var Classloader = (function(){
   Classloader.prototype.Classloader = Classloader;
 
 
-  Classloader.prototype.getClasses = function()
-  {
+  Classloader.prototype.getClasses = function() {
     var _this = this;
 
     this.filelist.forEach(function(file) {
-        var name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.')),
+        var name = file.replace(_this.sourcePath + '/', '').replace('.js', ''),
             c = new ClassObject(name, FileSystem.readFileSync(file, this.encoding));
 
         if (_this.debug) {
@@ -80,7 +77,7 @@ var Classloader = (function(){
     var _this = this;
 
     config.shims.forEach(function(shim) {
-      _this.classes[shim.name] = {
+      _this.classes[shim.source] = {
         source: shim.source,
         isResolved: function() {return true;},
         getDependencies: function() {return [];},
@@ -90,17 +87,21 @@ var Classloader = (function(){
     });
   };
 
-  Classloader.prototype.compile = function () 
-  {
+  Classloader.prototype.compile = function () {
+
+    this.parseShims();
+
     // update dependencies and parents
-    for (var name in this.classes)
-    {
+    for (var name in this.classes) {
       var c = this.classes[name],
           dependencies = c.getDependencies();
       
-      for (var dependency in dependencies)
-      {
+      for (var dependency in dependencies) {
         var obj = this.classes[dependency];
+
+        if (!obj) {
+          throw new Error("Dependency " + dependency + " not found for Class " + name);
+        }
 
         // update the dependency with the full class object
         c.updateDependency(dependency, obj);
@@ -110,9 +111,12 @@ var Classloader = (function(){
     this.resolveOrder(this.package);
   };
 
-  Classloader.prototype.resolveOrder = function (name)
-  {
+  Classloader.prototype.resolveOrder = function (name) {
     var c = this.classes[name];
+
+    if (!c) {
+      throw new Error("Class " + name + " not found");
+    }
 
     for (var name in c.getUnresolvedDependencies()) {
       this.resolveOrder(name);
@@ -125,8 +129,7 @@ var Classloader = (function(){
     }
   }
 
-  Classloader.prototype.getUnresolvedClasses = function ()
-  {
+  Classloader.prototype.getUnresolvedClasses = function () {
     var classes = {};
     for(var name in this.classes) {
       if (!this.classes[name].isResolved()) {
@@ -140,8 +143,7 @@ var Classloader = (function(){
     }
   };
 
-  Classloader.prototype.writeOutput = function() 
-  {    
+  Classloader.prototype.writeOutput = function() {
     process.stdout.write("\"use strict\";\n");
     process.stdout.write("// " + this.package + " - Node Classloader Version " + this.version + this.D_EOF);
 

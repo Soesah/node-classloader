@@ -4,8 +4,7 @@
 
 var Class = (function(){
   
-  var Class = function Class(name, source)
-  { 
+  var Class = function Class(name, source) {
     this.name = name;
     this.source = (source + '');
     this.lines = [];
@@ -17,13 +16,11 @@ var Class = (function(){
 
   Class.prototype.Class = Class;
 
-  Class.prototype.getClassName = function()
-  {
+  Class.prototype.getClassName = function() {
     return this.name;
   };
 
-  Class.prototype.parseLines = function()
-  {
+  Class.prototype.parseLines = function() {
     var _this = this,
         source = this.source.split('\n');
 
@@ -37,10 +34,11 @@ var Class = (function(){
     });
   };
 
-  Class.prototype.addDependency = function(line) 
-  {
-    var stripped = line.substring(7), // strip 'Import'
-        dependency = stripped.substring(0, stripped.indexOf('from') - 1);
+  Class.prototype.addDependency = function(line) {
+    // strip everything before 'from'
+    var stripped = line.substring(line.indexOf('from') + 5),
+        dependency = stripped.replace(/[\'\;]/g, '').trim();
+
     this.dependencies[dependency] = true;
   };
 
@@ -48,27 +46,28 @@ var Class = (function(){
     this.dependencies[name] = obj;
   };
 
-  Class.prototype.hasDependencies = function()
-  {
+  Class.prototype.hasDependencies = function() {
     return !this.isEmpty(this.dependencies);
   };
 
-  Class.prototype.getDependencies = function()
-  {
+  Class.prototype.getDependencies = function() {
     return this.dependencies;
   };
 
-  Class.prototype.getUnresolvedDependencies = function()
-  {
+  Class.prototype.getUnresolvedDependencies = function() {
     var obj = {};
-    for (var name in this.dependencies)
-      if (!this.dependencies[name].isResolved())
+    for (var name in this.dependencies) {
+      if (!this.dependencies[name]) {
+        throw new Error(this.name + " cannot resolve dependency " + name);
+      }
+      if (!this.dependencies[name].isResolved()) {
         obj[name] = this.dependencies[name];
+      }
+    }
     return obj;
   };
 
-  Class.prototype.removeComments = function (code)
-  {
+  Class.prototype.removeComments = function (code) {
     this.lines = this.lines.map(function(line) {
       return line.replace(/((\s|$)\/\/.*)/g, "");
     });    
@@ -79,13 +78,11 @@ var Class = (function(){
   };
 
 
-  Class.prototype.setResolved = function() 
-  {
+  Class.prototype.setResolved = function() {
     this.resolved = true;
   };
 
-  Class.prototype.isResolved = function() 
-  {
+  Class.prototype.isResolved = function() {
     return this.resolved;
   };
 
