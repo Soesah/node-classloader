@@ -22,8 +22,7 @@ ob_start('ob_gzhandler') ;
 
 $package = str_replace('_', '.', key($_GET));
 
-if ($package == "")
-{
+if ($package == "") {
   echo "console.error('Classloader Error: no package found');";
   die();
 }
